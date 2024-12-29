@@ -13,7 +13,7 @@ class LiveStreamController extends GetxController {
   int currentChannelIndex = 0; // 当前频道的索引
   late BetterPlayerController betterPlayerController;
   // 模拟中央频道数据列表
-  final List<String> centralChannels = ["CCTV1", "CCTV2", "CCTV3"];
+  final List<String> centralChannels = ["CCTV1", "CCTV2", "CCTV3","CCTV1", "CCTV2", "CCTV3","CCTV1", "CCTV2", "CCTV3","CCTV1", "CCTV2", "CCTV3"];
   // 模拟卫视频道数据列表
   final List<String> satelliteChannels = ["湖南卫视", "浙江卫视", "江苏卫视"];
   // 模拟本地频道数据列表
@@ -53,8 +53,8 @@ class LiveStreamController extends GetxController {
     betterPlayerController.setupDataSource(
       BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,
-          streamUrl,
-        //"https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
+         // streamUrl,
+        "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
       ),
     );
     betterPlayerController.addEventsListener((events) {
@@ -104,5 +104,18 @@ class LiveStreamController extends GetxController {
     currentChannelIndex = index;
     currentStreamUrl = channelData[index]['streamUrl'];
     update(); // 通知 GetBuilder 更新 UI
+  }
+  //寻找下标
+  List<String>? getCurrentChannels(){
+    if (selectedIndex ==
+        0) {
+      return centralChannels;
+    } else if (selectedIndex ==
+        1) {
+      return satelliteChannels;
+    } else if (selectedIndex ==
+        2) {
+      return  localChannels;
+    }
   }
 }
