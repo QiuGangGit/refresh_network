@@ -8,7 +8,7 @@ class Routes {
   static List<GetPage> get pages {
     return [
        GetPage(name: login,page: () =>  LoginPage(),),
-      GetPage(name: home,page: () =>  HomeListPage(),)
+      GetPage(name: home,page: () =>  LiveStreamingPage(),)
     ];
   }
 }
