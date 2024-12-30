@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:refresh_network/home_list/widget/device_info_widget.dart';
 
 import '../logic.dart';
 
@@ -33,9 +35,9 @@ class DecoderOptionsDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 右侧内容（解码选项）
+                // 左侧内容（解码选项）
                 _buildDecoderOptions(context, halfWidth),
-                // 左侧分类（直播源 / 解码选项）
+                // 右侧分类（直播源 / 解码选项）
                 _buildCategoryList(context, quarterWidth),
               ],
             ),
@@ -49,10 +51,10 @@ class DecoderOptionsDialog extends StatelessWidget {
   Widget _buildDecoderOptions(BuildContext context, double width) {
     return GetBuilder<LiveStreamController>(
       builder: (_) {
-        List<String> currentChannels = Get.find<LiveStreamController>()
-            .selectedIndex == 0
-            ? Get.find<LiveStreamController>().sourceChannels
-            : Get.find<LiveStreamController>().sourceDecodingChannels;
+        List<String> currentChannels =
+            Get.find<LiveStreamController>().selectedIndex == 0
+                ? Get.find<LiveStreamController>().sourceChannels
+                : Get.find<LiveStreamController>().sourceDecodingChannels;
 
         return Expanded(
           child: Container(
@@ -94,25 +96,59 @@ class DecoderOptionsDialog extends StatelessWidget {
   Widget _buildCategoryList(BuildContext context, double width) {
     return GetBuilder<LiveStreamController>(
       builder: (logic) {
-        return Container(
-          width: width,
-          height: double.infinity,
-          color: const Color(0x99111A28),
-          alignment: Alignment.center,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              _buildCategoryItem("直播源", 0, logic),
-              _buildCategoryItem("视频解码", 1, logic),
-            ],
-          ),
+        return Column(
+          children: [
+            Text("设置",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 9.sp,
+                )),
+            Padding(
+              padding: EdgeInsets.only(left: 8.w, right: 8.w),
+              child: Container(
+                height: 1,
+                color: Colors.white,
+              ),
+            ),
+            Container(
+              width: width,
+              height: double.infinity,
+              color: const Color(0x99111A28),
+              alignment: Alignment.center,
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  _buildCategoryItem("直播源", 0, logic),
+                  _buildCategoryItem("视频解码", 1, logic),
+                ],
+              ),
+            ),
+            Spacer(),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: (){
+                showDeviceInfo(context);
+              },
+              child: Text(
+                "系统信息",
+                style: TextStyle(
+                    fontSize: 14.sp,
+                    color: Colors.white,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.white,
+                    decorationThickness: 1.0),
+              ),
+            ),
+            SizedBox(height: 10.w,),
+          ],
         );
       },
     );
   }
 
   // 单个分类项
-  Widget _buildCategoryItem(String title, int index, LiveStreamController logic) {
+  Widget _buildCategoryItem(
+      String title, int index, LiveStreamController logic) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -120,7 +156,9 @@ class DecoderOptionsDialog extends StatelessWidget {
         logic.update();
       },
       child: Container(
-        color: logic.selectedIndex == index ? const Color(0xFFE65100) : Colors.transparent,
+        color: logic.selectedIndex == index
+            ? const Color(0xFFE65100)
+            : Colors.transparent,
         height: 30.w,
         padding: EdgeInsets.only(right: 16.w),
         child: Column(
@@ -144,6 +182,16 @@ class DecoderOptionsDialog extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void showDeviceInfo(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return const DeviceInfoDialog();
+      },
     );
   }
 }

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:better_player/better_player.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -39,10 +42,13 @@ class LiveStreamController extends GetxController {
 
   // 当前选中的频道分类索引，初始化为0表示中央频道
   var selectedIndex = 0;
+  final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 
+  late AndroidDeviceInfo androidInfo;
   @override
   Future<void> onInit() async {
     super.onInit();
+    getDeviceInfo();
     channelData = [
       "https://test-hls-streams.s3.amazonaws.com/playlist.m3u8",
       "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
@@ -129,5 +135,21 @@ class LiveStreamController extends GetxController {
       return localChannels;
     }
     return null;
+  }
+
+
+
+  Future<void> getDeviceInfo() async {
+    try {
+      // 获取设备信息
+      if (Platform.isAndroid) {
+        androidInfo= await _deviceInfoPlugin.androidInfo;
+        print('Android Model: ${androidInfo.model}'); // 获取设备型号
+        print('Android Version: ${androidInfo.version.release}'); // 获取 Android 系统版本
+        print('Android Device: ${androidInfo.device}'); // 获取设备 ID
+      }
+    } catch (e) {
+      print('Error getting device info: $e');
+    }
   }
 }
