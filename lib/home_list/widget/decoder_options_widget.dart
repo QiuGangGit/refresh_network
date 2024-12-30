@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:refresh_network/home_list/widget/device_info_widget.dart';
@@ -96,51 +97,63 @@ class DecoderOptionsDialog extends StatelessWidget {
   Widget _buildCategoryList(BuildContext context, double width) {
     return GetBuilder<LiveStreamController>(
       builder: (logic) {
-        return Column(
-          children: [
-            Text("设置",
-                style: TextStyle(
+        return Container(
+          height: double.infinity,
+          width: width,
+          color: const Color(0x99111A28),
+          child: Column(
+            children: [
+              Container(
+                height: 20.w,
+                child: Center(
+                  child: Text("设置",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.sp,
+                      )),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 8.w, right: 8.w),
+                child: Container(
+                  height: 0.5.w,
+                  width: double.infinity,
                   color: Colors.white,
-                  fontSize: 9.sp,
-                )),
-            Padding(
-              padding: EdgeInsets.only(left: 8.w, right: 8.w),
-              child: Container(
-                height: 1,
-                color: Colors.white,
+                ),
               ),
-            ),
-            Container(
-              width: width,
-              height: double.infinity,
-              color: const Color(0x99111A28),
-              alignment: Alignment.center,
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  _buildCategoryItem("直播源", 0, logic),
-                  _buildCategoryItem("视频解码", 1, logic),
-                ],
+              Expanded(
+                child: Container(
+                  width: width,
+                  // color: const Color(0x99111A28),
+                  alignment: Alignment.center,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      _buildCategoryItem("直播源", 0, logic),
+                      _buildCategoryItem("视频解码", 1, logic),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            Spacer(),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: (){
-                showDeviceInfo(context);
-              },
-              child: Text(
-                "系统信息",
-                style: TextStyle(
-                    fontSize: 14.sp,
-                    color: Colors.white,
-                    decoration: TextDecoration.underline,
-                    decorationColor: Colors.white,
-                    decorationThickness: 1.0),
+               Spacer(),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: (){
+                  showDeviceInfo(context);
+                },
+                child: Text(
+                  "系统信息",
+                  style: TextStyle(
+                      fontSize: 9.sp,
+                      color: Colors.white,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.white,
+                      decorationThickness: 1.0),
+                ),
               ),
-            ),
-            SizedBox(height: 10.w,),
-          ],
+              SizedBox(height: 10.w,),
+            ],
+          ),
         );
       },
     );
