@@ -40,6 +40,41 @@ class LiveStreamingPage extends StatelessWidget {
               );
             },
           ),
+          // 频道切换时显示黑色背景
+          GetBuilder<LiveStreamController>(
+            builder: (controller) {
+              return controller.isSwitching
+                  ? Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.7),
+                ),
+              )
+                  : Container(); // 不显示黑色背景
+            },
+          ),
+          // 底部弹框显示下一个频道名称
+          GetBuilder<LiveStreamController>(
+            builder: (controller) {
+              return Positioned(
+                bottom: 20,
+                left: 20,
+                right: 20,
+                child: controller.isSwitching
+                    ? Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Switching to: ',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                )
+                    : Container(), // 不显示底部弹框
+              );
+            },
+          ),
           DownloadSpeedIndicator(),  // 下载速度显示框
           // 左侧频道分类菜单
           _buildSideMenu(

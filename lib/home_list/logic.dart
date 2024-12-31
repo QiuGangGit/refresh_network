@@ -14,7 +14,7 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
   String currentStreamUrl = ""; // 当前播放的流地址
   int currentChannelIndex = 0; // 当前频道的索引
   late BetterPlayerController betterPlayerController;
-
+  bool isSwitching = false; // 控制是否显示黑色背景和切换动画
   // 模拟中央频道数据列表
   final List<String> centralChannels = [
     "CCTV1",
@@ -55,6 +55,7 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
     channelData = [
       "https://test-hls-streams.s3.amazonaws.com/playlist.m3u8",
       "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+      "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
     ];
     currentStreamUrl = "https://dl2.apexteam.net/pana/vendor/course_1.mp4";
     //"https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8";
@@ -79,7 +80,7 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
       BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,
         // streamUrl,
-        "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
+        currentStreamUrl,
       ),
     );
     // 监听错误事件（例如网络断开）
@@ -90,8 +91,12 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
     });
     // 在初始化时配置视频播放器
     betterPlayerController.addEventsListener((event) {
+      if (event.betterPlayerEventType == BetterPlayerEventType.exception) {
+        _retryPlay();
+      }
       // 监听缓冲开始
       if (event.betterPlayerEventType == BetterPlayerEventType.bufferingStart) {
+        _showLoading(true); // 显示加载提示
       }
 
       // 监听缓冲更新（可选：在缓冲时更新下载速度）
@@ -103,11 +108,17 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
       // 监听缓冲结束
       else if (event.betterPlayerEventType ==
           BetterPlayerEventType.bufferingEnd) {
+        _showLoading(false); // 隐藏加载提示
         stopSpeedCalculation();
       }
     });
   }
-
+  // 显示或隐藏加载提示（底部弹框）
+  void _showLoading(bool show) {
+    // 更新 UI，控制是否显示加载提示
+    isSwitching = show;
+    update(); // 通知 GetBuilder 更新 UI
+  }
   // 重新播放视频
   void _retryPlay() {
     // 如果是网络断开，尝试重新加载视频
@@ -115,7 +126,7 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
     betterPlayerController.setupDataSource(
       BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,
-        "https://example.com/path/to/video.m3u8", // 重复视频源地址
+        currentStreamUrl, // 重复视频源地址
       ),
     );
   }
@@ -178,9 +189,25 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
 
   // 切换频道
   void switchChannel(int index) {
+    if (index < 0 || index >= channelData.length) return;
+
+    // 设置切换状态为正在切换
+    isSwitching = true;
+
+    // 设置新的视频流地址
+    currentStreamUrl = channelData[index];
     currentChannelIndex = index;
-    currentStreamUrl = channelData[index]['streamUrl'];
-    update(); // 通知 GetBuilder 更新 UI
+
+    // 更新视频播放源
+    betterPlayerController.setupDataSource(
+      BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        currentStreamUrl,
+      ),
+    );
+
+    // 更新UI显示
+    update();
   }
 
   //寻找下标
