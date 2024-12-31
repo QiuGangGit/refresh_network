@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:better_player/better_player.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +17,7 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
   int currentChannelIndex = 0; // 当前频道的索引
   late BetterPlayerController betterPlayerController;
   bool isSwitching = false; // 控制是否显示黑色背景和切换动画
+  bool showChannelPopup = false; // 用于控制弹框显示
   // 模拟中央频道数据列表
   final List<String> centralChannels = [
     "CCTV1",
@@ -47,17 +50,20 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 
   late AndroidDeviceInfo androidInfo;
-
+  Timer? _popupTimer; // 控制弹框延迟的计时器
+  final Connectivity _connectivity = Connectivity();
+  bool _isRetrying = false; // 防止重复重试
   @override
   Future<void> onInit() async {
     super.onInit();
     getDeviceInfo();
+    _listenToNetworkChanges(); // 添加网络监听
     channelData = [
-      "https://test-hls-streams.s3.amazonaws.com/playlist.m3u8",
-      "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+      "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
+      "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
       "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
     ];
-    currentStreamUrl = "https://dl2.apexteam.net/pana/vendor/course_1.mp4";
+    currentStreamUrl = channelData[0];
     //"https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8";
     betterPlayerController = BetterPlayerController(
       const BetterPlayerConfiguration(
@@ -83,16 +89,10 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
         currentStreamUrl,
       ),
     );
-    // 监听错误事件（例如网络断开）
-    betterPlayerController.addEventsListener((events) {
-      if (events.betterPlayerEventType == BetterPlayerEventType.exception) {
-        _retryPlay();
-      }
-    });
     // 在初始化时配置视频播放器
     betterPlayerController.addEventsListener((event) {
       if (event.betterPlayerEventType == BetterPlayerEventType.exception) {
-        _retryPlay();
+        _startRetry(); // 启动重试逻辑
       }
       // 监听缓冲开始
       if (event.betterPlayerEventType == BetterPlayerEventType.bufferingStart) {
@@ -113,24 +113,46 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
       }
     });
   }
+  void _startRetry() {
+    if (_isRetrying) return; // 防止重复调用
+    _isRetrying = true;
+
+    print("Starting network retry process...");
+    // 不需要额外逻辑，这里等待 _listenToNetworkChanges() 自动处理
+  }
   // 显示或隐藏加载提示（底部弹框）
   void _showLoading(bool show) {
     // 更新 UI，控制是否显示加载提示
     isSwitching = show;
     update(); // 通知 GetBuilder 更新 UI
-  }
-  // 重新播放视频
-  void _retryPlay() {
-    // 如果是网络断开，尝试重新加载视频
-    print("Retrying to load video...");
-    betterPlayerController.setupDataSource(
-      BetterPlayerDataSource(
-        BetterPlayerDataSourceType.network,
-        currentStreamUrl, // 重复视频源地址
-      ),
-    );
+    if (show) {
+      showChannelPopup = show;
+      update(); // 通知 GetBuilder 更新 UI
+    } else {
+      // 取消之前的计时器，确保只处理最后一次滑动的延迟
+      _popupTimer?.cancel();
+      _popupTimer = Timer(const Duration(seconds: 1), () {
+        // 延迟 2 秒后隐藏弹框
+        showChannelPopup = false;
+        update(); // 通知 UI 更新
+      });
+    }
   }
 
+  void _retryPlay() {
+    try {
+      print("Retrying playback...");
+      betterPlayerController.setupDataSource(
+        BetterPlayerDataSource(
+          BetterPlayerDataSourceType.network,
+          currentStreamUrl, // 重复视频源地址
+        ),
+      );
+      betterPlayerController.play();
+    } catch (e) {
+      print("Retry play failed: $e");
+    }
+  }
 // 监听缓存进度
   void checkBufferedProgress() {
     betterPlayerController.videoPlayerController!.addListener(() {
@@ -235,5 +257,21 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
     } catch (e) {
       print('Error getting device info: $e');
     }
+  }
+  void _listenToNetworkChanges() {
+    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+      print("Network status changed: $result");
+      if (result == ConnectivityResult.mobile ||
+          result == ConnectivityResult.wifi) {
+        print("Network is available.");
+        _retryPlay();
+        // if (_isRetrying) {
+        //   _retryPlay();
+        //   _isRetrying = false; // 重置状态
+        // }
+      } else {
+        print("Network unavailable.");
+      }
+    });
   }
 }
