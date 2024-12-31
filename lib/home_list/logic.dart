@@ -82,6 +82,12 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
         "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
       ),
     );
+    // 监听错误事件（例如网络断开）
+    betterPlayerController.addEventsListener((events) {
+      if (events.betterPlayerEventType == BetterPlayerEventType.exception) {
+        _retryPlay();
+      }
+    });
     // 在初始化时配置视频播放器
     betterPlayerController.addEventsListener((event) {
       // 监听缓冲开始
@@ -100,6 +106,18 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
         stopSpeedCalculation();
       }
     });
+  }
+
+  // 重新播放视频
+  void _retryPlay() {
+    // 如果是网络断开，尝试重新加载视频
+    print("Retrying to load video...");
+    betterPlayerController.setupDataSource(
+      BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        "https://example.com/path/to/video.m3u8", // 重复视频源地址
+      ),
+    );
   }
 
 // 监听缓存进度
