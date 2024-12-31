@@ -22,8 +22,21 @@ class LiveStreamingPage extends StatelessWidget {
           // 视频播放器部分
           GetBuilder<LiveStreamController>(
             builder: (_) {
-              return BetterPlayer(
-                controller: controller.betterPlayerController,
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onVerticalDragUpdate: (details) {
+                  // 根据上下滑动距离判断切换频道
+                  if (details.primaryDelta! < 0) {
+                    // 向上滑动（下一个频道）
+                    _.switchChannel(_.selectedIndex + 1);
+                  } else if (details.primaryDelta! > 0) {
+                    // 向下滑动（上一个频道）
+                    _.switchChannel(_.selectedIndex - 1);
+                  }
+                },
+                child: BetterPlayer(
+                  controller: controller.betterPlayerController,
+                ),
               );
             },
           ),
