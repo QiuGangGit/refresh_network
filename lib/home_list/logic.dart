@@ -7,7 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-class LiveStreamController extends GetxController {
+import 'net_speed_logic.dart';
+
+class LiveStreamController extends GetxController with NetSpeedLogic {
   List<dynamic> channelData = []; // 频道数据
   String currentStreamUrl = ""; // 当前播放的流地址
   int currentChannelIndex = 0; // 当前频道的索引
@@ -45,6 +47,7 @@ class LiveStreamController extends GetxController {
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 
   late AndroidDeviceInfo androidInfo;
+
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -79,6 +82,43 @@ class LiveStreamController extends GetxController {
         "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
       ),
     );
+    // 在初始化时配置视频播放器
+    betterPlayerController.addEventsListener((event) {
+      // 监听缓冲开始
+      if (event.betterPlayerEventType == BetterPlayerEventType.bufferingStart) {
+      }
+
+      // 监听缓冲更新（可选：在缓冲时更新下载速度）
+      else if (event.betterPlayerEventType ==
+          BetterPlayerEventType.bufferingUpdate) {
+        calculateDownloadSpeed();
+      }
+
+      // 监听缓冲结束
+      else if (event.betterPlayerEventType ==
+          BetterPlayerEventType.bufferingEnd) {
+        stopSpeedCalculation();
+      }
+    });
+  }
+
+// 监听缓存进度
+  void checkBufferedProgress() {
+    betterPlayerController.videoPlayerController!.addListener(() {
+      final buffered =
+          betterPlayerController.videoPlayerController!.value.buffered;
+      if (buffered.isNotEmpty) {
+        // 获取缓存的总进度（以秒为单位）
+        final bufferedDuration = buffered.last.end.inSeconds;
+        print("Buffered up to: $bufferedDuration seconds");
+
+        // 根据缓存进度判断视频是否加载缓慢
+        if (bufferedDuration < 10) {
+          print(
+              "Warning: Video loading slowly (less than 10 seconds buffered).");
+        }
+      }
+    });
   }
 
   @override
@@ -137,15 +177,14 @@ class LiveStreamController extends GetxController {
     return null;
   }
 
-
-
   Future<void> getDeviceInfo() async {
     try {
       // 获取设备信息
       if (Platform.isAndroid) {
-        androidInfo= await _deviceInfoPlugin.androidInfo;
+        androidInfo = await _deviceInfoPlugin.androidInfo;
         print('Android Model: ${androidInfo.model}'); // 获取设备型号
-        print('Android Version: ${androidInfo.version.release}'); // 获取 Android 系统版本
+        print(
+            'Android Version: ${androidInfo.version.release}'); // 获取 Android 系统版本
         print('Android Device: ${androidInfo.device}'); // 获取设备 ID
       }
     } catch (e) {

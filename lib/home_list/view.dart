@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:refresh_network/home_list/widget/channel_list_widget.dart';
 import 'package:refresh_network/home_list/widget/decoder_options_widget.dart';
-import 'logic.dart'; // 导入控制器
+import 'logic.dart';
+import 'widget/download_speed_widget.dart'; // 导入控制器
 
 enum Position { left, right }
 
@@ -26,7 +27,7 @@ class LiveStreamingPage extends StatelessWidget {
               );
             },
           ),
-
+          DownloadSpeedIndicator(),  // 下载速度显示框
           // 左侧频道分类菜单
           _buildSideMenu(
             context: context,
