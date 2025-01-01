@@ -14,12 +14,6 @@ class DeviceInfoDialog extends StatelessWidget {
       builder: (logic) {
         return Stack(
           children: [
-            // Positioned.fill(
-            //   child: IgnorePointer(
-            //     ignoring: true,
-            //     child: Container(color: Color(0xFF111A28),),
-            //   ),
-            // ),
             Positioned(
               left: 0,
               top: 0,

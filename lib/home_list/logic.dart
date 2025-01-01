@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:refresh_network/home_list/update_logic.dart';
 
 import 'net_speed_logic.dart';
 
-class LiveStreamController extends GetxController with NetSpeedLogic {
+class LiveStreamController extends GetxController with NetSpeedLogic,UpdateLogic{
   List<dynamic> channelData = []; // 频道数据
   String currentStreamUrl = ""; // 当前播放的流地址
   int currentChannelIndex = 0; // 当前频道的索引
@@ -56,6 +57,7 @@ class LiveStreamController extends GetxController with NetSpeedLogic {
   @override
   Future<void> onInit() async {
     super.onInit();
+    checkForUpdates();
     getDeviceInfo();
     _listenToNetworkChanges(); // 添加网络监听
     channelData = [
