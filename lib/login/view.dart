@@ -1,48 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:refresh_network/route.dart';
-
+import 'package:qr_flutter/qr_flutter.dart';
 import 'logic.dart';
 
 class LoginPage extends StatelessWidget {
-  LoginPage({Key? key}) : super(key: key);
-
-  final logic = Get.put(LoginLogic());
-
+  final LoginLogic controller = Get.put(LoginLogic());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login Page'),
+      body: GetBuilder<LoginLogic>(
+        builder: (controller) {
+          return Center(
+            child: controller.isLoggedIn
+                ? CircularProgressIndicator() // 显示登录状态
+                : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                controller.qrCodeUrl.isEmpty || controller.qrCodeUrl.startsWith("Error")
+                    ? Text(controller.qrCodeUrl) // 显示错误信息
+                    : QrImageView(
+                  data: controller.qrCodeUrl,
+                  version: QrVersions.auto,
+                  size: 200.0,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Use your phone to scan the QR code to log in.",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        },
       ),
-      body: Container(
-        margin: EdgeInsets.only(top: 50),
-        child: Column(
-          children: [
-            Text('Login Page'),
-            ElevatedButton(
-              onPressed: () {
-                Get.toNamed(Routes.home);
-              },
-              child: Text('Go to Home List'),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 20),
-              child: ElevatedButton(
-                onPressed: () {
-                  Get.toNamed(Routes.home);
-                },
-                child: Text('Go to Home List'),
-              ),
-            ),
-            Text('Login Page'),
-            Text('Login Page'),
-            Text('Login Page'),
-            Text('Login Page'),
-          ],
-        ),
-      )
-
     );
   }
 }
