@@ -71,18 +71,71 @@ class LiveStreamingPage extends StatelessWidget {
                   // right: 20,
                   child: controller.showChannelPopup
                       ? Container(
-                          padding: EdgeInsets.all(10.w),
-                          width: 100.w,
-                          height: 30.w,
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(8.w),
+                      margin: const EdgeInsets.only(bottom: 20.0), // 底部间距
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7), // 半透明背景
+                        borderRadius: BorderRadius.circular(10.0), // 圆角
+                      ),
+                      width: double.infinity, // 撑满屏幕宽度
+                      height: 80, // 固定高度
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // 左侧频道号
+                          Text(
+                            "54",
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
-                          child: Text(
-                            'Switching to: ${controller.currentChannelIndex}',
-                            style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                          SizedBox(width: 16.0), // 间距
+                          // 中间频道名称
+                          Expanded(
+                            child: Text(
+                              "佳木斯综合",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis, // 超出部分省略号
+                            ),
                           ),
-                        )
+                          // 右侧功能按钮
+                          Row(
+                            children: [
+                              // 频道按钮
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.check_circle, color: Colors.white, size: 20),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "频道",
+                                    style: TextStyle(fontSize: 12, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 16.0), // 间距
+                              // 换台按钮
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.swap_vert, color: Colors.white, size: 20),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "换台",
+                                    style: TextStyle(fontSize: 12, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        ],
+                      ))
                       : Container(), // 不显示底部弹框
                 );
               },

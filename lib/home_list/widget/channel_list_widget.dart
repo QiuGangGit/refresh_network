@@ -38,6 +38,35 @@ class ChannelListDialog extends StatelessWidget {
             ),
           ),
         ),
+        Positioned(
+          left: 0,
+          right: 0,
+          top: MediaQuery.of(context).size.height-30,
+          width: double.infinity,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent, // 上方透明
+                  Colors.black.withOpacity(0.7), // 下方黑色
+                ],
+              ),
+            ),
+            child: Row(
+              children: [
+                Text("version:1.0.0"),
+                Spacer(),
+                Row(
+                  children: [
+                    Text("当前播放频道:佳木斯综合"),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
