@@ -17,7 +17,7 @@ mixin UpdateLogic on GetxController {
   Future<void> checkForUpdates() async {
     // 模拟接口返回的数据
     final updateInfo = {
-      "latestVersion": "2.0.0",
+      "latestVersion": "1.0.0",
       "isForceUpdate": true,
       "updateUrl": "https://example.com/app.apk",
       "updateMessage": "New version available! Fixes and improvements."

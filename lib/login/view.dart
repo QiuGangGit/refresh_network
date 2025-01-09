@@ -10,25 +10,30 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       body: GetBuilder<LoginLogic>(
         builder: (controller) {
-          return Center(
-            child: controller.isLoggedIn
-                ? CircularProgressIndicator() // 显示登录状态
-                : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                controller.qrCodeUrl.isEmpty || controller.qrCodeUrl.startsWith("Error")
-                    ? Text(controller.qrCodeUrl) // 显示错误信息
-                    : QrImageView(
-                  data: controller.qrCodeUrl,
-                  version: QrVersions.auto,
-                  size: 200.0,
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Use your phone to scan the QR code to log in.",
-                  textAlign: TextAlign.center,
-                ),
-              ],
+          return GestureDetector(
+            onTap: (){
+              controller.onLoginSuccess();
+            },
+            child: Center(
+              child: controller.isLoggedIn
+                  ? CircularProgressIndicator() // 显示登录状态
+                  : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  controller.qrCodeUrl.isEmpty || controller.qrCodeUrl.startsWith("Error")
+                      ? Text(controller.qrCodeUrl) // 显示错误信息
+                      : QrImageView(
+                    data: controller.qrCodeUrl,
+                    version: QrVersions.auto,
+                    size: 200.0,
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Use your phone to scan the QR code to log in.",
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           );
         },

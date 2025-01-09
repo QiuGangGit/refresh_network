@@ -146,7 +146,7 @@ class LiveStreamingPage extends StatelessWidget {
               context: context,
               position: Position.left,
               onDragEnd: () => showChannelList(context),
-              width: halfWidth,
+              width: double.infinity,
             ),
 
             // 右侧解码器菜单

@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../logic.dart';
@@ -39,11 +41,10 @@ class ChannelListDialog extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: 0,
-          right: 0,
-          top: MediaQuery.of(context).size.height-30,
-          width: double.infinity,
           child: Container(
+            width: double.infinity,
+            height: 80.w,
+            margin: EdgeInsets.only(top:  MediaQuery.of(context).size.height-30),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -54,16 +55,31 @@ class ChannelListDialog extends StatelessWidget {
                 ],
               ),
             ),
-            child: Row(
-              children: [
-                Text("version:1.0.0"),
-                Spacer(),
-                Row(
-                  children: [
-                    Text("当前播放频道:佳木斯综合"),
-                  ],
-                )
-              ],
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: 50.w),
+                    child: Text("version:1.0.0",style: TextStyle(
+                      color:  Colors.white,
+                      fontSize: 9,
+                    )),
+                  ),
+                  Spacer(),
+                  Container(
+                    margin: EdgeInsets.only(right: 120.w),
+                    child: Row(
+                      children: [
+                        Text("当前播放频道:佳木斯综合",style: TextStyle(
+                    color:  Colors.white,
+                      fontSize: 9,
+                    )),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
