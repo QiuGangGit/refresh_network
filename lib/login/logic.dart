@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:refresh_network/serivice/api_service.dart';
 
 import '../route.dart';
 
@@ -16,6 +17,8 @@ class LoginLogic extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    ApiService.appInit();
+    ApiService.appChannelList("");
     //获取设备二维码
     getDeviceInfo();
     // onLoginSuccess();
