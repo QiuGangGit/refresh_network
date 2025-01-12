@@ -36,7 +36,7 @@ class LiveStreamingPage extends StatelessWidget {
             onInvoke: (intent) {
               controller.switchChannel(
                 controller.currentChannelIndex <= 0
-                    ? controller.channelData.length - 1
+                    ? controller.streamUrls.length - 1
                     : controller.currentChannelIndex - 1,
               );
               return null;
@@ -45,7 +45,7 @@ class LiveStreamingPage extends StatelessWidget {
           MoveDownIntent: CallbackAction<MoveDownIntent>(
             onInvoke: (intent) {
               controller.switchChannel(
-                controller.currentChannelIndex >= controller.channelData.length - 1
+                controller.currentChannelIndex >= controller.streamUrls.length - 1
                     ? 0
                     : controller.currentChannelIndex + 1,
               );
@@ -88,7 +88,7 @@ class LiveStreamingPage extends StatelessWidget {
               // 向上滑动（下一个频道）
               controller.switchChannel(
                 controller.currentChannelIndex >=
-                        controller.channelData.length - 1
+                        controller.streamUrls.length - 1
                     ? 0
                     : controller.currentChannelIndex + 1,
               );
@@ -96,7 +96,7 @@ class LiveStreamingPage extends StatelessWidget {
               // 向下滑动（上一个频道）
               controller.switchChannel(
                 controller.currentChannelIndex <= 0
-                    ? controller.channelData.length - 1
+                    ? controller.streamUrls.length - 1
                     : controller.currentChannelIndex - 1,
               );
             }
@@ -208,7 +208,7 @@ class LiveStreamingPage extends StatelessWidget {
                 context: context,
                 position: Position.left,
                 onDragEnd: () => showChannelList(context),
-                width: double.infinity,
+                width: width,
               ),
 
               // 右侧解码器菜单

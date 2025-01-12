@@ -9,45 +9,34 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:refresh_network/home_list/update_logic.dart';
+import 'package:refresh_network/home_list/utils/DataUtils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../serivice/api_service.dart';
+import 'bean/ChannelBean.dart';
 import 'net_speed_logic.dart';
 
 class LiveStreamController extends GetxController with NetSpeedLogic,UpdateLogic{
-  List<dynamic> channelData = []; // 频道数据
+  List categoryChannel=[];//频道分类
+  List<ChannelBean> childChannel=[];//子频道集合
+  List<ChannelBean>? listChannelBean;//请求多个分类返回的频道集合
   String currentStreamUrl = ""; // 当前播放的流地址
   int currentChannelIndex = 0; // 当前频道的索引
+  int currentCategoryIndex = 0; // 当前频分类索引
+  List<String> streamUrls=[];
+  // 当前选中的频道分类索引，初始化为0表示中央频道
+  var selectedIndex = 0;
   late BetterPlayerController betterPlayerController;
   bool isSwitching = false; // 控制是否显示黑色背景和切换动画
   bool showChannelPopup = false; // 用于控制弹框显示
-  // 模拟中央频道数据列表
-  final List<String> centralChannels = [
-    "CCTV1",
-    "CCTV2",
-    "CCTV3",
-    "CCTV1",
-    "CCTV2",
-    "CCTV3",
-    "CCTV1",
-    "CCTV2",
-    "CCTV3",
-    "CCTV1",
-    "CCTV2",
-    "CCTV3"
-  ];
 
-  // 模拟卫视频道数据列表
-  final List<String> satelliteChannels = ["湖南卫视", "浙江卫视", "江苏卫视"];
-
-  // 模拟本地频道数据列表
-  final List<String> localChannels = ["本地综合频道", "本地生活频道", "本地影视频道"];
 
   //直播源
   final List<String> sourceChannels = ["源1", "源2", "源3"];
 
   final List<String> sourceDecodingChannels = ["系统解码", "LJK硬解", "LJK软解"];
 
-  // 当前选中的频道分类索引，初始化为0表示中央频道
-  var selectedIndex = 0;
+
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 
   late AndroidDeviceInfo androidInfo;
@@ -57,16 +46,6 @@ class LiveStreamController extends GetxController with NetSpeedLogic,UpdateLogic
   @override
   Future<void> onInit() async {
     super.onInit();
-    checkForUpdates();
-    getDeviceInfo();
-    _listenToNetworkChanges(); // 添加网络监听
-    channelData = [
-      "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
-      "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
-      "https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001",
-    ];
-    currentStreamUrl = channelData[0];
-    //"https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8";
     betterPlayerController = BetterPlayerController(
       const BetterPlayerConfiguration(
         autoPlay: true,
@@ -83,14 +62,12 @@ class LiveStreamController extends GetxController with NetSpeedLogic,UpdateLogic
         ],
       ),
     );
-    final streamUrl = await getStreamUrl("https://live.kilvn.com/radio.m3u");
-    betterPlayerController.setupDataSource(
-      BetterPlayerDataSource(
-        BetterPlayerDataSourceType.network,
-        // streamUrl,
-        currentStreamUrl,
-      ),
-    );
+    checkForUpdates();
+    getDeviceInfo();
+    getChannelData();
+    _listenToNetworkChanges(); // 添加网络监听
+    setCurrentStreamUrl();
+    setupPlayer(currentStreamUrl);
     // 在初始化时配置视频播放器
     betterPlayerController.addEventsListener((event) {
       if (event.betterPlayerEventType == BetterPlayerEventType.exception) {
@@ -115,6 +92,44 @@ class LiveStreamController extends GetxController with NetSpeedLogic,UpdateLogic
       }
     });
   }
+  setCurrentStreamUrl(){
+    if (childChannel.isNotEmpty && currentChannelIndex >= 0 && currentChannelIndex < childChannel.length) {
+      streamUrls = DataUtils.parseChannelSource(childChannel[currentChannelIndex].channelSource ?? "");
+    } else {
+      streamUrls = [];
+    }
+    currentStreamUrl = streamUrls.isNotEmpty ? streamUrls[0] : "";//"https://gcalic.v.myalicdn.com/gc/ztd_1/index.m3u8?contentid=2820180516001";
+    print("哈哈哈哈哈哈哈哈哈${currentStreamUrl}");
+  }
+  void setupPlayer(String? streamUrl) {
+    if (streamUrl == null || streamUrl.isEmpty) {
+      print("播放地址为空，无法设置数据源");
+      return;
+    }
+
+    betterPlayerController?.setupDataSource(
+      BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        streamUrl,
+      ),
+    );
+  }
+  getChannelData()async{
+    final prefs = await SharedPreferences.getInstance();
+    final qrCodeUrl = prefs.getString('qrCodeUrl'); // 读取字符串
+    listChannelBean=await ApiService.appChannelList(qrCodeUrl??"");
+    if(listChannelBean==null){
+      return;
+    }
+    categoryChannel=DataUtils.sortChannelCategory(listChannelBean!);
+    getChildChannel(listChannelBean!);
+    update();
+  }
+  void getChildChannel(List<ChannelBean> listChannelBean){
+    childChannel=listChannelBean.where((item) => item.sort == selectedIndex).toList();
+    update();
+  }
+
   void _startRetry() {
     if (_isRetrying) return; // 防止重复调用
     _isRetrying = true;
@@ -213,13 +228,13 @@ class LiveStreamController extends GetxController with NetSpeedLogic,UpdateLogic
 
   // 切换频道
   void switchChannel(int index) {
-    if (index < 0 || index >= channelData.length) return;
+    if (index < 0 || index >= streamUrls.length) return;
 
     // 设置切换状态为正在切换
     isSwitching = true;
 
     // 设置新的视频流地址
-    currentStreamUrl = channelData[index];
+    currentStreamUrl = streamUrls[index];
     currentChannelIndex = index;
 
     // 更新视频播放源
@@ -234,17 +249,6 @@ class LiveStreamController extends GetxController with NetSpeedLogic,UpdateLogic
     update();
   }
 
-  //寻找下标
-  List<String>? getCurrentChannels() {
-    if (selectedIndex == 0) {
-      return centralChannels;
-    } else if (selectedIndex == 1) {
-      return satelliteChannels;
-    } else if (selectedIndex == 2) {
-      return localChannels;
-    }
-    return null;
-  }
 
   Future<void> getDeviceInfo() async {
     try {

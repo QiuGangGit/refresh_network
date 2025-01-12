@@ -98,11 +98,9 @@ class ChannelListDialog extends StatelessWidget {
           alignment: Alignment.center,
           child: ListView(
             shrinkWrap: true,
-            children: [
-              _buildCategoryItem("中央频道", 0, logic),
-              _buildCategoryItem("卫视频道", 1, logic),
-              _buildCategoryItem("本地频道", 2, logic),
-            ],
+            children: logic.categoryChannel
+                .map((item) => _buildCategoryItem(item['categoryName'], item['sort'], logic))
+                .toList(),
           ),
         );
       },
@@ -126,6 +124,7 @@ class ChannelListDialog extends StatelessWidget {
       ),
       onTap: () {
         logic.selectedIndex = index;
+        logic.getChildChannel(logic.listChannelBean!);
         logic.update();
       },
     );
@@ -138,25 +137,28 @@ class ChannelListDialog extends StatelessWidget {
         return Expanded(
           child: ListView.builder(
             padding: EdgeInsets.zero,
-            itemCount: logic.getCurrentChannels()?.length ?? 0,
+            itemCount: logic.childChannel.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
+                  //切换选台
+                  logic.currentChannelIndex=index;
+                  logic.currentCategoryIndex=logic.selectedIndex;
+                  logic.setCurrentStreamUrl();
+                  logic.update();
                   Get.back(); // 关闭频道列表
                 },
                 child: Container(
                   height: 25.w,
-                  color: index == 0
+                  color: logic.selectedIndex == logic.currentCategoryIndex &&index == logic.currentChannelIndex
                       ? const Color(0xFFE65100)
                       : const Color(0x80132034),
                   child: Center(
                     child: Text(
-                      logic.getCurrentChannels()![index],
+                      logic.childChannel[index].channelName??"",
                       style: TextStyle(
-                        color: logic.selectedIndex == 1
-                            ? const Color(0xFFE65100)
-                            : Colors.white,
+                        color: Colors.white,
                         fontSize: 9.sp,
                       ),
                     ),
