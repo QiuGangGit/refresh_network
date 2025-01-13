@@ -9,6 +9,8 @@ import 'package:refresh_network/home_list/utils/DataUtils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../serivice/api_service.dart';
 import 'bean/ChannelBean.dart';
+import 'bean/category_with_channels.dart';
+import 'bean/channel_with_selection.dart';
 import 'net_speed_logic.dart';
 
 class LiveStreamController extends GetxController
@@ -20,7 +22,7 @@ class LiveStreamController extends GetxController
   int currentCategoryIndex = 0; // 当前分类索引
   var selectedCategoryIndex = 0; // 选中的频道分类索引
   var selectedIndex = 0;
-
+  late List<CategoryWithChannels> categoryWithChannels;
   // 界面状态
   bool isSwitching = false; // 是否显示切换动画
   bool showChannelPopup = false; // 弹框显示状态
@@ -41,8 +43,8 @@ class LiveStreamController extends GetxController
     getDeviceInfo(); //TODO 设备和网络放到一个logic
     checkForUpdates();
     getChannelData(); //获取频道数据
+
     _listenToNetworkChanges(); // 添加网络监听
-    setupPlayer(currentStreamUrl); //准备数据播放
   }
 
   ///获取频道数据
@@ -53,12 +55,43 @@ class LiveStreamController extends GetxController
     if (listChannelBean == null) {
       return;
     }
-    categoryChannel = DataUtils.sortChannelCategory(listChannelBean!);
-    childChannel = DataUtils.getChildChannel(listChannelBean!, selectedIndex);
+    // categoryChannel = DataUtils.sortChannelCategory(listChannelBean!);
+    // childChannel = DataUtils.getChildChannel(listChannelBean!, selectedIndex);
+    // 转换为分类和频道结构
+    categoryWithChannels = DataUtils.organizeChannelData(listChannelBean!);
     setCurrentStreamUrl(childChannel, currentChannelIndex);
+    // 输出分类及其频道
+    for (var category in categoryWithChannels) {
+      print("分类: ${category.categoryName} (sort: ${category.sort})");
+      for (var channel in category.channels ?? []) {
+        print(
+            "  - 频道: ${channel.channelName}, 选中状态: ${channel.isSelect}, 频道源: ${channel.channelSource}");
+      }
+    }
+    setupPlayer(currentStreamUrl); //准备数据播放
     update();
   }
+  void selectCategory(
+      List<CategoryWithChannels> categories, int categoryIndex) {
+    // 将所有分类设置为未选中
+    for (var category in categories) {
+      category.isSelect = false;
+    }
 
+    // 设置目标分类为选中
+    categories[categoryIndex].isSelect = true;
+  }
+
+  void selectChannel(
+      List<ChannelWithSelection> channels, int channelIndex) {
+    // 将所有频道设置为未选中
+    for (var channel in channels) {
+      channel.isSelect = false;
+    }
+
+    // 设置目标频道为选中
+    channels[channelIndex].isSelect = true;
+  }
   @override
   void onClose() {
     super.onClose();
@@ -77,10 +110,14 @@ class LiveStreamController extends GetxController
     currentChannelIndex = index;
     currentCategoryIndex == selectedIndex;
     setCurrentStreamUrl(childChannel, currentChannelIndex);
+    setupPlayer(currentStreamUrl); //准备数据播放
     update();
     Get.back(); // 关闭频道列表
   }
+  ///视频上下滑动 选台
+  void slidUp(){
 
+  }
   ///监听网络变化
   void _listenToNetworkChanges() {
     _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
