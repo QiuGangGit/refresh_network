@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../logic.dart';
+import '../utils/DataUtils.dart';
 
 class ChannelListDialog extends StatelessWidget {
   const ChannelListDialog({super.key});
@@ -44,7 +45,8 @@ class ChannelListDialog extends StatelessWidget {
           child: Container(
             width: double.infinity,
             height: 80.w,
-            margin: EdgeInsets.only(top:  MediaQuery.of(context).size.height-30),
+            margin:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height - 30),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -61,20 +63,22 @@ class ChannelListDialog extends StatelessWidget {
                 children: [
                   Container(
                     margin: EdgeInsets.only(left: 50.w),
-                    child: Text("version:1.0.0",style: TextStyle(
-                      color:  Colors.white,
-                      fontSize: 9,
-                    )),
+                    child: Text("version:1.0.0",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                        )),
                   ),
                   Spacer(),
                   Container(
                     margin: EdgeInsets.only(right: 120.w),
                     child: Row(
                       children: [
-                        Text("当前播放频道:佳木斯综合",style: TextStyle(
-                    color:  Colors.white,
-                      fontSize: 9,
-                    )),
+                        Text("当前播放频道:佳木斯综合",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                            )),
                       ],
                     ),
                   )
@@ -99,7 +103,8 @@ class ChannelListDialog extends StatelessWidget {
           child: ListView(
             shrinkWrap: true,
             children: logic.categoryChannel
-                .map((item) => _buildCategoryItem(item['categoryName'], item['sort'], logic))
+                .map((item) => _buildCategoryItem(
+                    item['categoryName'], item['sort'], logic))
                 .toList(),
           ),
         );
@@ -123,9 +128,7 @@ class ChannelListDialog extends StatelessWidget {
         ),
       ),
       onTap: () {
-        logic.selectedIndex = index;
-        logic.getChildChannel(logic.listChannelBean!);
-        logic.update();
+        logic.clickLeftMenuCategory(index);
       },
     );
   }
@@ -143,20 +146,17 @@ class ChannelListDialog extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   //切换选台
-                  logic.currentChannelIndex=index;
-                  logic.currentCategoryIndex=logic.selectedIndex;
-                  logic.setCurrentStreamUrl();
-                  logic.update();
-                  Get.back(); // 关闭频道列表
+                  logic.clickRightChannel(index); // 关闭频道列表
                 },
                 child: Container(
                   height: 25.w,
-                  color: logic.selectedIndex == logic.currentCategoryIndex &&index == logic.currentChannelIndex
+                  color: logic.selectedIndex == logic.currentCategoryIndex &&
+                          index == logic.currentChannelIndex
                       ? const Color(0xFFE65100)
                       : const Color(0x80132034),
                   child: Center(
                     child: Text(
-                      logic.childChannel[index].channelName??"",
+                      logic.childChannel[index].channelName ?? "",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 9.sp,

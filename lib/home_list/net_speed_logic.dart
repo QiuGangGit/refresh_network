@@ -61,4 +61,6 @@ mixin NetSpeedLogic on GetxController {
   void updateDownloadedBytes(int bytes) {
     totalDownloadedBytes += bytes;
   }
+
+
 }

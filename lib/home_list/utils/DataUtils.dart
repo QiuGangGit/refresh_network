@@ -26,4 +26,9 @@ class DataUtils{
     }
     return channelSource.split(',').map((url) => url.trim()).where((url) => url.isNotEmpty).toList();
   }
+
+  static List<ChannelBean> getChildChannel(List<ChannelBean> listChannelBean,int selectedIndex) {
+    return
+        listChannelBean.where((item) => item.sort == selectedIndex).toList();
+  }
 }

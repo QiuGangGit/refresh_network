@@ -51,12 +51,11 @@ class DecoderOptionsDialog extends StatelessWidget {
   // 右侧解码选项列表
   Widget _buildDecoderOptions(BuildContext context, double width) {
     return GetBuilder<LiveStreamController>(
-      builder: (_) {
+      builder: (logic) {
         List<String> currentChannels =
-            Get.find<LiveStreamController>().selectedIndex == 0
-                ? Get.find<LiveStreamController>().sourceChannels
-                : Get.find<LiveStreamController>().sourceDecodingChannels;
-
+        logic.selectedIndex == 0
+                ? logic.streamUrls
+                : logic.sourceDecodingChannels;
         return Expanded(
           child: Container(
             color: const Color(0x80132034),
@@ -68,12 +67,19 @@ class DecoderOptionsDialog extends StatelessWidget {
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
+                    logic.selectedIndex == 0
+                        ? logic
+                            .currentDecodingIndex = index
+                        : logic.currentStreamIndex =
+                            index;
                     Get.back(); // 关闭对话框
                   },
                   child: Container(
                     height: 35,
                     width: double.infinity,
                     alignment: Alignment.center,
+                    color: logic
+                        .currentDecodingIndex==index||logic.currentStreamIndex==index?Colors.red:Colors.white,
                     child: Center(
                       child: Text(
                         currentChannels[index],
@@ -135,10 +141,10 @@ class DecoderOptionsDialog extends StatelessWidget {
                   ),
                 ),
               ),
-               Spacer(),
+              Spacer(),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: (){
+                onTap: () {
                   showDeviceInfo(context);
                 },
                 child: Text(
@@ -151,7 +157,9 @@ class DecoderOptionsDialog extends StatelessWidget {
                       decorationThickness: 1.0),
                 ),
               ),
-              SizedBox(height: 10.w,),
+              SizedBox(
+                height: 10.w,
+              ),
             ],
           ),
         );
