@@ -15,6 +15,8 @@ mixin PlayerLogic on GetxController {
   late BetterPlayerController betterPlayerController;
   int categoryIndex = 0; // 当前分类索引
   int channelIndex = 0; // 当前频道索引
+  int? previousCategoryIndex; // 保存上一次的分类索引
+  int? previousChannelIndex; // 保存上一次的频道索引
   int settingIndex = 0; //右侧弹窗设置 源和解码
   int decodeIndex = 0; //解码下标
   bool isSwitching = false; // 是否切换状态
@@ -160,4 +162,12 @@ mixin PlayerLogic on GetxController {
     // 设置目标频道为选中
     channels[channelIndex].isSelect = true;
   }
+
+  ///设置频道都是false
+  void setChannelFalse(List<ChannelWithSelection> channels){
+    for (var channel in channels) {
+      channel.isSelect = false;
+    }
+  }
+
 }

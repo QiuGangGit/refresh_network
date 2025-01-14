@@ -52,10 +52,13 @@ class DecoderOptionsDialog extends StatelessWidget {
   Widget _buildDecoderOptions(BuildContext context, double width) {
     return GetBuilder<LiveStreamController>(
       builder: (logic) {
+        List<String> channelSourceList = logic
+                .categoryWithChannels[logic.categoryIndex]
+                .channels![logic.channelIndex]
+                .channelSource ??
+            [];
         List<String> currentChannels = logic.settingIndex == 0
-            ? logic.categoryWithChannels[logic.categoryIndex]
-                    .channels![logic.channelIndex].channelSource ??
-                []
+            ? channelSourceList
             : logic.sourceDecodingChannels;
         return Expanded(
           child: Container(
@@ -80,17 +83,22 @@ class DecoderOptionsDialog extends StatelessWidget {
                     height: 35,
                     width: double.infinity,
                     alignment: Alignment.center,
-                    color: logic.decodeIndex == index ||
-                            logic
-                                    .categoryWithChannels[logic.categoryIndex]
-                                    .channels![logic.channelIndex]
-                                    .currentSourceIndex ==
-                                index
+                    color: (logic.settingIndex == 0 &&
+                                logic
+                                        .categoryWithChannels[
+                                            logic.categoryIndex]
+                                        .channels![logic.channelIndex]
+                                        .currentSourceIndex ==
+                                    index) ||
+                            (logic.settingIndex == 1 &&
+                                logic.decodeIndex == index)
                         ? Colors.red
-                        : Colors.white,
+                        : Color(0x80132034),
                     child: Center(
                       child: Text(
-                        currentChannels[index],
+                        logic.settingIndex == 0
+                            ? "源${index + 1}"
+                            : currentChannels[index],
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 9.sp,

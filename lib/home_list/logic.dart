@@ -38,7 +38,6 @@ class LiveStreamController extends GetxController
 
     _listenToNetworkChanges(); // 添加网络监听
   }
-
   ///获取频道数据
   getChannelData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -74,10 +73,45 @@ class LiveStreamController extends GetxController
 
   /// 左侧分类菜单部分 频道分类点击
   void clickLeftMenuCategory(int index) {
+    if(categoryIndex==index){
+      return;
+    }
+    // 保存之前的选中状态
+    previousCategoryIndex = categoryIndex;
+    previousChannelIndex = categoryWithChannels[categoryIndex]
+        .channels
+        ?.indexWhere((channel) => channel.isSelect == true);
+
+    // 更新为新分类
     categoryIndex = index;
+    selectCategory(categoryWithChannels, categoryIndex);
+
+    // 清空新分类的频道选中状态
+    setChannelFalse(categoryWithChannels[categoryIndex].channels ?? []);
+
     update();
   }
+  ///点击左侧分类+没有在左侧弹框选择频道+返回的情况
+  void restorePreviousSelection() {
+    if (previousCategoryIndex != null && previousChannelIndex != null) {
+      // 恢复分类和频道的选中状态
+      categoryIndex = previousCategoryIndex!;
+      selectCategory(categoryWithChannels, categoryIndex);
 
+      if (previousChannelIndex! >= 0 &&
+          previousChannelIndex! < categoryWithChannels[categoryIndex].channels!.length) {
+        categoryWithChannels[categoryIndex]
+            .channels![previousChannelIndex!]
+            .isSelect = true;
+      }
+
+      // 清空之前保存的状态
+      previousCategoryIndex = null;
+      previousChannelIndex = null;
+
+      update();
+    }
+  }
   ///右侧频道部分 切换选台
   void clickRightChannel(int index) {
     channelIndex = index; // 当前频道索引

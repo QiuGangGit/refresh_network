@@ -29,16 +29,24 @@ class ChannelListDialog extends StatelessWidget {
           top: 0,
           bottom: 0,
           width: halfWidth,
-          child: Dialog(
-            insetPadding: EdgeInsets.zero,
-            backgroundColor: Colors.transparent,
-            child: Row(
-              children: [
-                // 左侧分类部分
-                _buildCategoryList(context, quarterWidth),
-                // 右侧频道列表部分
-                _buildChannelList(context),
-              ],
+          child: WillPopScope(
+            onWillPop: () async {
+              // 返回按钮被点击时执行的逻辑
+              print("用户点击了返回按钮或触发了返回手势");
+              Get.find<LiveStreamController>().restorePreviousSelection();
+              return true; // 返回 true 允许页面返回，返回 false 阻止页面返回
+            },
+            child: Dialog(
+              insetPadding: EdgeInsets.zero,
+              backgroundColor: Colors.transparent,
+              child: Row(
+                children: [
+                  // 左侧分类部分
+                  _buildCategoryList(context, quarterWidth),
+                  // 右侧频道列表部分
+                  _buildChannelList(context),
+                ],
+              ),
             ),
           ),
         ),
