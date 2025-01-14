@@ -2,8 +2,7 @@ import '../bean/ChannelBean.dart';
 import '../bean/category_with_channels.dart';
 import '../bean/channel_with_selection.dart';
 
-class DataUtils{
-
+class DataUtils {
   /// 转换方法: 将一维数组转换为 List<CategoryWithChannels>
   static List<CategoryWithChannels> organizeChannelData(
       List<ChannelBean> channelList) {
@@ -25,13 +24,14 @@ class DataUtils{
 
       // 将频道加入对应分类
       categoryMap[sort]?.channels?.add(ChannelWithSelection(
-        sort: channel.sort,
-        channelName: channel.channelName,
-        categoryName: channel.categoryName,
-        channelNumber: channel.channelNumber,
-        channelSource: channel.channelSource?.split(',').map((e) => e.trim()).toList(),
-        channelStatus: channel.channelStatus,
-      ));
+            sort: channel.sort,
+            channelName: channel.channelName,
+            categoryName: channel.categoryName,
+            channelNumber: channel.channelNumber,
+            channelSource:
+                channel.channelSource?.split(',').map((e) => e.trim()).toList(),
+            channelStatus: channel.channelStatus,
+          ));
     }
 
     // 返回 List<CategoryWithChannels> 并按 sort 排序
@@ -39,35 +39,29 @@ class DataUtils{
       ..sort((a, b) => (a.sort ?? 0).compareTo(b.sort ?? 0));
   }
 
+  static String getCurrentStreamUrl(
+      List<CategoryWithChannels>? categoryWithChannels,
+      int categoryIndex,
+      int channelIndex) {
+    // 获取当前分类和频道
+    var currentCategory = categoryWithChannels?[categoryIndex];
+    var currentChannel = currentCategory?.channels?[channelIndex];
 
-  static List sortChannelCategory( List<ChannelBean> listChannelBean){
-    // 1. 按 sort 排序
-    listChannelBean.sort((a, b) => a.sort!.compareTo(b.sort!));
-
-    // 2. 去重，只保留每个 sort 的第一个 categoryName
-    final Map<int, String> sortCategoryMap = {};
-    for (var item in listChannelBean!) {
-      final sort = item.sort!;
-      if (!sortCategoryMap.containsKey(sort)) {
-        sortCategoryMap[sort] = item.categoryName??"";
-      }
+    // 如果分类或频道为空，返回空字符串
+    if (currentChannel == null) {
+      return "";
     }
 
-    // 3. 将结果转为 List，按 sort 顺序存放
-    return sortCategoryMap.entries
-        .map((entry) => {"sort": entry.key, "categoryName": entry.value})
-        .toList();
+    // 根据 currentSourceIndex 获取当前播放的 URL
+    int currentSourceIndex = currentChannel.currentSourceIndex;
+    var channelSources = currentChannel.channelSource;
 
-  }
-  static List<String> parseChannelSource(String? channelSource) {
-    if (channelSource == null || channelSource.isEmpty) {
-      return []; // 返回空列表
+    if (channelSources == null ||
+        currentSourceIndex < 0 ||
+        currentSourceIndex >= channelSources.length) {
+      return ""; // 索引无效或频道源为空
     }
-    return channelSource.split(',').map((url) => url.trim()).where((url) => url.isNotEmpty).toList();
-  }
 
-  static List<ChannelBean> getChildChannel(List<ChannelBean> listChannelBean,int selectedIndex) {
-    return
-        listChannelBean.where((item) => item.sort == selectedIndex).toList();
+    return channelSources[currentSourceIndex];
   }
 }

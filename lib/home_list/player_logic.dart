@@ -1,19 +1,23 @@
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:refresh_network/home_list/utils/DataUtils.dart';
-
-import 'bean/ChannelBean.dart';
+import 'bean/category_with_channels.dart';
+import 'bean/channel_with_selection.dart';
+import 'logic.dart';
 import 'net_speed_logic.dart';
 
 mixin PlayerLogic on GetxController {
+  /// 获取 LiveStreamController 的实例
+  LiveStreamController get logic => Get.find<LiveStreamController>();
   late BetterPlayerController betterPlayerController;
-  String currentStreamUrl = ""; // 当前播放流地址
-  List<String> streamUrls = []; // 当前频道所有播放源
-  int currentStreamIndex = 0; // 当前播放源的索引
+  int categoryIndex = 0; // 当前分类索引
+  int channelIndex = 0; // 当前频道索引
+  int settingIndex = 0; //右侧弹窗设置 源和解码
+  int decodeIndex = 0; //解码下标
   bool isSwitching = false; // 是否切换状态
-  int currentChannelIndex = 0; // 当前频道索引
   // 初始化播放器
   void initializePlayer() {
     betterPlayerController = BetterPlayerController(
@@ -57,19 +61,6 @@ mixin PlayerLogic on GetxController {
     }
   }
 
-  // 设置当前播放地址
-  void setCurrentStreamUrl(List<ChannelBean> childChannel, int currentChannelIndex) {
-    if (childChannel.isNotEmpty &&
-        currentChannelIndex >= 0 &&
-        currentChannelIndex < childChannel.length) {
-      streamUrls =
-          DataUtils.parseChannelSource(childChannel[currentChannelIndex].channelSource ?? "");
-    } else {
-      streamUrls = [];
-    }
-    currentStreamUrl = streamUrls.isNotEmpty ? streamUrls[0] : "";
-  }
-
   // 设置播放器数据源
   void setupPlayer(String? streamUrl) {
     if (streamUrl == null || streamUrl.isEmpty) {
@@ -85,18 +76,6 @@ mixin PlayerLogic on GetxController {
     );
   }
 
-  // 切换播放源
-  void switchStream(int index) {
-    if (index < 0 || index >= streamUrls.length) return;
-
-    isSwitching = true;
-    currentStreamUrl = streamUrls[index];
-    currentStreamIndex = index;
-
-    setupPlayer(currentStreamUrl);
-    update();
-  }
-
   // 模拟加载过程
   void showLoading(bool show) {
     isSwitching = show;
@@ -106,7 +85,8 @@ mixin PlayerLogic on GetxController {
   // 重试逻辑
   void startRetry() {
     print("重试播放...");
-    setupPlayer(currentStreamUrl);
+    setupPlayer(DataUtils.getCurrentStreamUrl(
+        logic.categoryWithChannels, categoryIndex, channelIndex));
     betterPlayerController.play();
   }
 
@@ -116,25 +96,68 @@ mixin PlayerLogic on GetxController {
   }
 
   // 切换频道
-  void switchChannel(int index) {
-    if (index < 0 || index >= streamUrls.length) return;
+  void switchChannel(List<CategoryWithChannels> categories, bool isNext) {
+    // 获取当前分类
+    var currentCategory = categories[categoryIndex];
+    var currentChannels = currentCategory.channels;
 
-    // 设置切换状态为正在切换
-    isSwitching = true;
+    if (currentChannels == null || currentChannels.isEmpty) {
+      return; // 当前分类没有频道
+    }
 
-    // 设置新的视频流地址
-    currentStreamUrl = streamUrls[index];
-    currentChannelIndex = index;
+    // 更新频道索引
+    if (isNext) {
+      channelIndex++;
+      if (channelIndex >= currentChannels.length) {
+        // 切换到下一个分类
+        categoryIndex++;
+        if (categoryIndex >= categories.length) {
+          categoryIndex = 0; // 循环到第一个分类
+        }
+        currentCategory = categories[categoryIndex];
+        currentChannels = currentCategory.channels ?? [];
+        channelIndex = 0; // 切换到新分类的第一个频道
+      }
+    } else {
+      channelIndex--;
+      if (channelIndex < 0) {
+        // 切换到上一个分类
+        categoryIndex--;
+        if (categoryIndex < 0) {
+          categoryIndex = categories.length - 1; // 循环到最后一个分类
+        }
+        currentCategory = categories[categoryIndex];
+        currentChannels = currentCategory.channels ?? [];
+        channelIndex = currentChannels.length - 1; // 切换到最后一个频道
+      }
+    }
 
-    // 更新视频播放源
-    betterPlayerController.setupDataSource(
-      BetterPlayerDataSource(
-        BetterPlayerDataSourceType.network,
-        currentStreamUrl,
-      ),
-    );
+    // 更新分类和频道的选中状态
+    selectCategory(categories, categoryIndex);
+    selectChannel(currentChannels, channelIndex);
 
-    // 更新UI显示
+    // 更新 UI
     update();
+  }
+  ///设置分类选中
+  void selectCategory(
+      List<CategoryWithChannels> categories, int categoryIndex) {
+    // 将所有分类设置为未选中
+    for (var category in categories) {
+      category.isSelect = false;
+    }
+
+    // 设置目标分类为选中
+    categories[categoryIndex].isSelect = true;
+  }
+  ///设置频道选中
+  void selectChannel(List<ChannelWithSelection> channels, int channelIndex) {
+    // 将所有频道设置为未选中
+    for (var channel in channels) {
+      channel.isSelect = false;
+    }
+
+    // 设置目标频道为选中
+    channels[channelIndex].isSelect = true;
   }
 }

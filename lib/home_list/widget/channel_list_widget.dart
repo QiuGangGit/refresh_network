@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../bean/channel_with_selection.dart';
 import '../logic.dart';
 import '../utils/DataUtils.dart';
 
@@ -102,9 +103,14 @@ class ChannelListDialog extends StatelessWidget {
           alignment: Alignment.center,
           child: ListView(
             shrinkWrap: true,
-            children: logic.categoryChannel
-                .map((item) => _buildCategoryItem(
-                    item['categoryName'], item['sort'], logic))
+            children: logic.categoryWithChannels
+                .asMap()
+                .entries
+                .map((entry) => _buildCategoryItem(
+                    entry.value.categoryName ?? "",
+                    entry.value.isSelect,
+                    entry.key, // 索引
+                    logic))
                 .toList(),
           ),
         );
@@ -114,15 +120,13 @@ class ChannelListDialog extends StatelessWidget {
 
   // 单个分类项
   Widget _buildCategoryItem(
-      String title, int index, LiveStreamController logic) {
+      String title, bool isSelect, int index, LiveStreamController logic) {
     return ListTile(
       title: Center(
         child: Text(
           title,
           style: TextStyle(
-            color: logic.selectedIndex == index
-                ? const Color(0xFFE65100)
-                : Colors.white,
+            color: isSelect ? const Color(0xFFE65100) : Colors.white,
             fontSize: 9.sp,
           ),
         ),
@@ -137,10 +141,12 @@ class ChannelListDialog extends StatelessWidget {
   Widget _buildChannelList(BuildContext context) {
     return GetBuilder<LiveStreamController>(
       builder: (logic) {
+        List<ChannelWithSelection> channels =
+            logic.categoryWithChannels[logic.categoryIndex].channels ?? [];
         return Expanded(
           child: ListView.builder(
             padding: EdgeInsets.zero,
-            itemCount: logic.childChannel.length,
+            itemCount: channels.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -150,13 +156,12 @@ class ChannelListDialog extends StatelessWidget {
                 },
                 child: Container(
                   height: 25.w,
-                  color: logic.selectedIndex == logic.currentCategoryIndex &&
-                          index == logic.currentChannelIndex
+                  color: channels[index].isSelect
                       ? const Color(0xFFE65100)
                       : const Color(0x80132034),
                   child: Center(
                     child: Text(
-                      logic.childChannel[index].channelName ?? "",
+                      channels[index].channelName ?? "",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 9.sp,

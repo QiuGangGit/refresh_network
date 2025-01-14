@@ -52,10 +52,11 @@ class DecoderOptionsDialog extends StatelessWidget {
   Widget _buildDecoderOptions(BuildContext context, double width) {
     return GetBuilder<LiveStreamController>(
       builder: (logic) {
-        List<String> currentChannels =
-        logic.selectedIndex == 0
-                ? logic.streamUrls
-                : logic.sourceDecodingChannels;
+        List<String> currentChannels = logic.settingIndex == 0
+            ? logic.categoryWithChannels[logic.categoryIndex]
+                    .channels![logic.channelIndex].channelSource ??
+                []
+            : logic.sourceDecodingChannels;
         return Expanded(
           child: Container(
             color: const Color(0x80132034),
@@ -67,19 +68,26 @@ class DecoderOptionsDialog extends StatelessWidget {
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
-                    logic.selectedIndex == 0
+                    logic.settingIndex == 0
                         ? logic
-                            .currentDecodingIndex = index
-                        : logic.currentStreamIndex =
-                            index;
+                            .categoryWithChannels[logic.categoryIndex]
+                            .channels![logic.channelIndex]
+                            .currentSourceIndex = index
+                        : logic.decodeIndex = index;
                     Get.back(); // 关闭对话框
                   },
                   child: Container(
                     height: 35,
                     width: double.infinity,
                     alignment: Alignment.center,
-                    color: logic
-                        .currentDecodingIndex==index||logic.currentStreamIndex==index?Colors.red:Colors.white,
+                    color: logic.decodeIndex == index ||
+                            logic
+                                    .categoryWithChannels[logic.categoryIndex]
+                                    .channels![logic.channelIndex]
+                                    .currentSourceIndex ==
+                                index
+                        ? Colors.red
+                        : Colors.white,
                     child: Center(
                       child: Text(
                         currentChannels[index],
@@ -173,11 +181,11 @@ class DecoderOptionsDialog extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        logic.selectedIndex = index;
+        logic.settingIndex = index;
         logic.update();
       },
       child: Container(
-        color: logic.selectedIndex == index
+        color: logic.settingIndex == index
             ? const Color(0xFFE65100)
             : Colors.transparent,
         height: 30.w,

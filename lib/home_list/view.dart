@@ -23,21 +23,20 @@ class LiveStreamingPage extends StatelessWidget {
         autofocus: true, // 自动捕获焦点
         shortcuts: <LogicalKeySet, Intent>{
           // 电视遥控器按键映射
-          LogicalKeySet(LogicalKeyboardKey.arrowUp):  MoveUpIntent(),
-          LogicalKeySet(LogicalKeyboardKey.arrowDown):  MoveDownIntent(),
-          LogicalKeySet(LogicalKeyboardKey.arrowLeft):  OpenLeftDrawerIntent(),
-          LogicalKeySet(LogicalKeyboardKey.arrowRight):  OpenRightDrawerIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter):  ConfirmIntent(),
-          LogicalKeySet(LogicalKeyboardKey.escape):  BackIntent(),
+          LogicalKeySet(LogicalKeyboardKey.arrowUp): MoveUpIntent(),
+          LogicalKeySet(LogicalKeyboardKey.arrowDown): MoveDownIntent(),
+          LogicalKeySet(LogicalKeyboardKey.arrowLeft): OpenLeftDrawerIntent(),
+          LogicalKeySet(LogicalKeyboardKey.arrowRight): OpenRightDrawerIntent(),
+          LogicalKeySet(LogicalKeyboardKey.enter): ConfirmIntent(),
+          LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
         },
         actions: <Type, Action<Intent>>{
           // 上下左右键处理
           MoveUpIntent: CallbackAction<MoveUpIntent>(
             onInvoke: (intent) {
               controller.switchChannel(
-                controller.currentChannelIndex <= 0
-                    ? controller.streamUrls.length - 1
-                    : controller.currentChannelIndex - 1,
+                controller.categoryWithChannels,
+                true,
               );
               return null;
             },
@@ -45,9 +44,8 @@ class LiveStreamingPage extends StatelessWidget {
           MoveDownIntent: CallbackAction<MoveDownIntent>(
             onInvoke: (intent) {
               controller.switchChannel(
-                controller.currentChannelIndex >= controller.streamUrls.length - 1
-                    ? 0
-                    : controller.currentChannelIndex + 1,
+                controller.categoryWithChannels,
+                false,
               );
               return null;
             },
@@ -87,17 +85,14 @@ class LiveStreamingPage extends StatelessWidget {
             if (velocity < 0) {
               // 向上滑动（下一个频道）
               controller.switchChannel(
-                controller.currentChannelIndex >=
-                        controller.streamUrls.length - 1
-                    ? 0
-                    : controller.currentChannelIndex + 1,
+                controller.categoryWithChannels,
+                true,
               );
             } else if (velocity > 0) {
               // 向下滑动（上一个频道）
               controller.switchChannel(
-                controller.currentChannelIndex <= 0
-                    ? controller.streamUrls.length - 1
-                    : controller.currentChannelIndex - 1,
+                controller.categoryWithChannels,
+                false,
               );
             }
           },
@@ -133,71 +128,83 @@ class LiveStreamingPage extends StatelessWidget {
                     // right: 20,
                     child: controller.showChannelPopup
                         ? Container(
-                        margin: const EdgeInsets.only(bottom: 20.0), // 底部间距
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7), // 半透明背景
-                          borderRadius: BorderRadius.circular(10.0), // 圆角
-                        ),
-                        width: double.infinity, // 撑满屏幕宽度
-                        height: 80, // 固定高度
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // 左侧频道号
-                            Text(
-                              "54",
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            margin: const EdgeInsets.only(bottom: 20.0),
+                            // 底部间距
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.7), // 半透明背景
+                              borderRadius: BorderRadius.circular(10.0), // 圆角
                             ),
-                            SizedBox(width: 16.0), // 间距
-                            // 中间频道名称
-                            Expanded(
-                              child: Text(
-                                "佳木斯综合",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                overflow: TextOverflow.ellipsis, // 超出部分省略号
-                              ),
-                            ),
-                            // 右侧功能按钮
-                            Row(
+                            width: double.infinity,
+                            // 撑满屏幕宽度
+                            height: 80,
+                            // 固定高度
+                            child: const Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // 频道按钮
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.check_circle, color: Colors.white, size: 20),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      "频道",
-                                      style: TextStyle(fontSize: 12, color: Colors.white),
-                                    ),
-                                  ],
+                                // 左侧频道号
+                                Text(
+                                  "54",
+                                  style: TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                                 SizedBox(width: 16.0), // 间距
-                                // 换台按钮
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                // 中间频道名称
+                                Expanded(
+                                  child: Text(
+                                    "佳木斯综合",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis, // 超出部分省略号
+                                  ),
+                                ),
+                                // 右侧功能按钮
+                                Row(
                                   children: [
-                                    Icon(Icons.swap_vert, color: Colors.white, size: 20),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      "换台",
-                                      style: TextStyle(fontSize: 12, color: Colors.white),
+                                    // 频道按钮
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.check_circle,
+                                            color: Colors.white, size: 20),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          "频道",
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(width: 16.0), // 间距
+                                    // 换台按钮
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.swap_vert,
+                                            color: Colors.white, size: 20),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          "换台",
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white),
+                                        ),
+                                      ],
                                     ),
                                   ],
-                                ),
+                                )
                               ],
-                            )
-                          ],
-                        ))
+                            ))
                         : Container(), // 不显示底部弹框
                   );
                 },
@@ -320,7 +327,7 @@ class LiveStreamingPage extends StatelessWidget {
                 onInvoke: (intent) {
                   if (!isCategoryFocused) {
                     // 在子分类列表中按下确定键，选择当前频道
-                    controller.switchChannel(currentSubCategoryIndex);
+                    // controller.clickRightChannel(index);
                     Navigator.pop(context); // 退出弹窗
                   }
                   return null;
@@ -348,6 +355,7 @@ class LiveStreamingPage extends StatelessWidget {
     );
   }
 }
+
 // 自定义 Intent 类
 class MoveUpIntent extends Intent {}
 
