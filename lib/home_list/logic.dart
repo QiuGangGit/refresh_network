@@ -19,7 +19,7 @@ class LiveStreamController extends GetxController
   // 界面状态
   bool isSwitching = false; // 是否显示切换动画
   bool showChannelPopup = false; // 弹框显示状态
-
+  Timer? _popupTimer; // 计时器
   // 网络和设备信息
   final Connectivity _connectivity = Connectivity();
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
@@ -38,6 +38,22 @@ class LiveStreamController extends GetxController
 
     _listenToNetworkChanges(); // 添加网络监听
   }
+
+  // 显示弹框并重置计时器
+  void showPopup() {
+    showChannelPopup = true;
+    update(); // 通知 UI 更新
+
+    // 如果已有计时器，先取消
+    _popupTimer?.cancel();
+
+    // 创建新的计时器，2 秒后隐藏弹框
+    _popupTimer = Timer(const Duration(seconds: 2), () {
+      showChannelPopup = false;
+      update(); // 通知 UI 更新
+    });
+  }
+
   ///获取频道数据
   getChannelData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -69,6 +85,7 @@ class LiveStreamController extends GetxController
   void onClose() {
     super.onClose();
     betterPlayerController.dispose();
+    _popupTimer?.cancel(); // 关闭页面时清理计时器
   }
 
   /// 左侧分类菜单部分 频道分类点击

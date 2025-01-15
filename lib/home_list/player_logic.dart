@@ -137,7 +137,8 @@ mixin PlayerLogic on GetxController {
     // 更新分类和频道的选中状态
     selectCategory(categories, categoryIndex);
     selectChannel(currentChannels, channelIndex);
-
+    setupPlayer(DataUtils.getCurrentStreamUrl(
+        logic.categoryWithChannels, categoryIndex, channelIndex)); //准备数据播放
     // 更新 UI
     update();
   }
