@@ -130,7 +130,7 @@ class LiveStreamingPage extends StatelessWidget {
                       .of(context)
                       .size
                       .width * 0.5 -
-                      (100.w / 2), // 居中计算
+                      (280.w / 2), // 居中计算
                   child: GetBuilder<LiveStreamController>(builder: (logic) {
                     CategoryWithChannels categoryWithChannels=logic.categoryWithChannels[logic.categoryIndex];
                     if(categoryWithChannels==null){
@@ -266,8 +266,6 @@ class LiveStreamingPage extends StatelessWidget {
 
   // 显示频道列表
   void showChannelList(BuildContext context) {
-    int currentCategoryIndex = 0; // 当前选中的分类索引
-    int currentSubCategoryIndex = 0; // 当前选中的子分类索引
     bool isCategoryFocused = true; // 焦点是否在分类列表
     showDialog(
       context: context,

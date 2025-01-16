@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../bean/category_with_channels.dart';
 import '../bean/channel_with_selection.dart';
 import '../logic.dart';
 import '../utils/DataUtils.dart';
@@ -15,13 +16,19 @@ class ChannelListDialog extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
     double halfWidth = width / 2;
     double quarterWidth = width / 4;
-
+    CategoryWithChannels categoryWithChannels=Get.find<LiveStreamController>().categoryWithChannels[Get.find<LiveStreamController>().categoryIndex];
+    String channelName=categoryWithChannels.channels![Get.find<LiveStreamController>().channelIndex].channelName.toString();
     return Stack(
       children: [
         Positioned.fill(
           child: IgnorePointer(
             ignoring: true,
-            child: Container(color: Colors.transparent),
+            child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: (){
+                  Get.back();
+                },
+                child: Container(color: Colors.transparent)),
           ),
         ),
         Positioned(
@@ -83,10 +90,16 @@ class ChannelListDialog extends StatelessWidget {
                     margin: EdgeInsets.only(right: 120.w),
                     child: Row(
                       children: [
-                        Text("当前播放频道:佳木斯综合",
+                        Icon(
+                          CupertinoIcons.play_arrow_solid,
+                          color: Color(0xFFE65100), // 设置颜色为黄色
+                          size: 20.w, // 图标大小
+                        ),
+                        SizedBox(width: 2.w,),
+                        Text("当前播放频道:${channelName}",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
+                              fontSize: 13.sp,
                             )),
                       ],
                     ),
