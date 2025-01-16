@@ -36,7 +36,7 @@ class LiveStreamController extends GetxController
     checkForUpdates();
     getChannelData(); //获取频道数据
 
-    _listenToNetworkChanges(); // 添加网络监听
+    _listenToNetworkChanges(); // 网络监听断网重连
   }
 
   // 显示弹框并重置计时器

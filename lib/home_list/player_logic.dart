@@ -20,6 +20,7 @@ mixin PlayerLogic on GetxController {
   int settingIndex = 0; //右侧弹窗设置 源和解码
   int decodeIndex = 0; //解码下标
   bool isSwitching = false; // 是否切换状态
+  bool isShowFailPlay=false;
   // 初始化播放器
   void initializePlayer() {
     betterPlayerController = BetterPlayerController(
@@ -47,16 +48,19 @@ mixin PlayerLogic on GetxController {
   void handlePlayerEvent(BetterPlayerEvent event) {
     switch (event.betterPlayerEventType) {
       case BetterPlayerEventType.exception:
-        startRetry();
+        isShowFailPlay=true;
+        logic.update();
         break;
       case BetterPlayerEventType.bufferingStart:
+        (this as NetSpeedLogic).startSpeedCalculation(); // 开始计算下载速度
         showLoading(true);
         break;
       case BetterPlayerEventType.bufferingEnd:
+        (this as NetSpeedLogic).stopSpeedCalculation(); // 停止计算下载速度
         showLoading(false);
         break;
       case BetterPlayerEventType.bufferingUpdate:
-        (this as NetSpeedLogic).calculateDownloadSpeed();
+        (this as NetSpeedLogic).updateDownloadedBytes( (this as NetSpeedLogic).totalDownloadedBytes);
         break;
       default:
         break;
@@ -69,7 +73,8 @@ mixin PlayerLogic on GetxController {
       print("播放地址为空，无法设置数据源");
       return;
     }
-
+    isShowFailPlay=false;
+    update();
     betterPlayerController.setupDataSource(
       BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,

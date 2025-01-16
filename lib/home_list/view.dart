@@ -1,4 +1,5 @@
 import 'package:better_player/better_player.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -92,6 +93,7 @@ class LiveStreamingPage extends StatelessWidget {
                 controller.categoryWithChannels,
                 true,
               );
+              controller.isShowFailPlay=false;
               controller.showPopup(); // 每次滑动都触发弹框
             } else if (velocity > 0) {
               // 向下滑动（上一个频道）
@@ -99,6 +101,7 @@ class LiveStreamingPage extends StatelessWidget {
                 controller.categoryWithChannels,
                 false,
               );
+              controller.isShowFailPlay=false;
               controller.showPopup(); // 每次滑动都触发弹框
             }
           },
@@ -119,6 +122,32 @@ class LiveStreamingPage extends StatelessWidget {
                       ? Positioned.fill(
                     child: Container(
                       color: Colors.black.withOpacity(0.7),
+                    ),
+                  )
+                      : Container(); // 不显示黑色背景
+                },
+              ),
+              // 频道切换时显示黑色背景
+              GetBuilder<LiveStreamController>(
+                builder: (controller) {
+                  return controller.isShowFailPlay
+                      ? Positioned.fill(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.exclamationmark_circle,
+                            size: 80.w,
+                            color: Color(0xFFE65100),
+                          ), // 使用 Cupertino 图标
+                          SizedBox(height: 16.w),
+                          Text(
+                            "当前源实效",
+                            style: TextStyle(color: Colors.grey, fontSize: 16.sp),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                       : Container(); // 不显示黑色背景
@@ -218,7 +247,7 @@ class LiveStreamingPage extends StatelessWidget {
                         )):Container();
                   })),
               // 底部弹框显示下一个频道名称
-              DownloadSpeedIndicator(), // 下载速度显示框
+              Get.find<LiveStreamController>().isSwitching?DownloadSpeedIndicator():Container(), // 下载速度显示框
               //左侧频道分类菜单
               _buildSideMenu(
                 context: context,
