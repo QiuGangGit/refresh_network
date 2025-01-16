@@ -59,7 +59,7 @@ class LiveStreamingPage extends StatelessWidget {
               // 频道切换时显示黑色背景
               GetBuilder<LiveStreamController>(
                 builder: (controller) {
-                  return controller.isSwitching
+                  return controller.isBuffering
                       ? Positioned.fill(
                           child: Container(
                             color: Colors.black.withOpacity(0.7),
@@ -102,11 +102,11 @@ class LiveStreamingPage extends StatelessWidget {
                   right:  MediaQuery.of(context).size.width * 0.5 -
                       (280.w / 2),
                   child: GetBuilder<LiveStreamController>(builder: (logic) {
-                    CategoryWithChannels categoryWithChannels =
-                        logic.categoryWithChannels[logic.categoryIndex];
-                    if (categoryWithChannels == null) {
+                    if(logic.categoryWithChannels.isEmpty){
                       return Container();
                     }
+                    CategoryWithChannels? categoryWithChannels =
+                        logic.categoryWithChannels[logic.categoryIndex];
                     String channelNumber = categoryWithChannels
                         .channels![logic.channelIndex].channelNumber
                         .toString();
@@ -195,10 +195,7 @@ class LiveStreamingPage extends StatelessWidget {
                         : Container();
                   })),
               // 底部弹框显示下一个频道名称
-              Get.find<LiveStreamController>().isSwitching
-                  ? DownloadSpeedIndicator()
-                  : Container(),
-              // 下载速度显示框
+              DownloadSpeedIndicator(),
               //左侧频道分类菜单
               _buildSideMenu(
                 context: context,

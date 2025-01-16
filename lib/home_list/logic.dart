@@ -15,10 +15,9 @@ import 'net_speed_logic.dart';
 
 class LiveStreamController extends GetxController
     with NetSpeedLogic, UpdateLogic, PlayerLogic, SlidingEventLogic {
-  late List<CategoryWithChannels> categoryWithChannels;
+  late List<CategoryWithChannels> categoryWithChannels= [];
 
   // 界面状态
-  bool isSwitching = false; // 是否显示切换动画
   bool showChannelPopup = false; // 弹框显示状态
   Timer? _popupTimer; // 计时器
   // 网络和设备信息

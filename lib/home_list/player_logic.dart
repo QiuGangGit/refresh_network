@@ -19,7 +19,6 @@ mixin PlayerLogic on GetxController {
   int? previousChannelIndex; // 保存上一次的频道索引
   int settingIndex = 0; //右侧弹窗设置 源和解码
   int decodeIndex = 0; //解码下标
-  bool isSwitching = false; // 是否切换状态
   bool isShowFailPlay=false;
   // 初始化播放器
   void initializePlayer() {
@@ -46,21 +45,28 @@ mixin PlayerLogic on GetxController {
 
   // 处理播放器事件
   void handlePlayerEvent(BetterPlayerEvent event) {
+
     switch (event.betterPlayerEventType) {
+
       case BetterPlayerEventType.exception:
         isShowFailPlay=true;
         logic.update();
         break;
       case BetterPlayerEventType.bufferingStart:
-        (this as NetSpeedLogic).startSpeedCalculation(); // 开始计算下载速度
-        showLoading(true);
+        print("-----------第一次");
+        logic.startSpeedCalculation(); // 开始计算下载速度
+
         break;
       case BetterPlayerEventType.bufferingEnd:
-        (this as NetSpeedLogic).stopSpeedCalculation(); // 停止计算下载速度
-        showLoading(false);
+        print("-----------第一次结束");
+        logic.stopSpeedCalculation(); // 停止计算下载速度
+
+
         break;
       case BetterPlayerEventType.bufferingUpdate:
-        (this as NetSpeedLogic).updateDownloadedBytes( (this as NetSpeedLogic).totalDownloadedBytes);
+        print("------33-----第一次结束");
+        final bufferedList = event.parameters?['buffered'];
+        logic.updateDownloadedBytesFromDurationRange(bufferedList[0]);
         break;
       default:
         break;
@@ -83,11 +89,6 @@ mixin PlayerLogic on GetxController {
     );
   }
 
-  // 模拟加载过程
-  void showLoading(bool show) {
-    isSwitching = show;
-    update();
-  }
 
   // 重试逻辑
   void startRetry() {
@@ -175,5 +176,4 @@ mixin PlayerLogic on GetxController {
       channel.isSelect = false;
     }
   }
-
 }
