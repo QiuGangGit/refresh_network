@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:get/get.dart';
 import 'package:refresh_network/home_list/player_logic.dart';
+import 'package:refresh_network/home_list/sliding_event_logic.dart';
 import 'package:refresh_network/home_list/update_logic.dart';
 import 'package:refresh_network/home_list/utils/DataUtils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +14,7 @@ import 'bean/category_with_channels.dart';
 import 'net_speed_logic.dart';
 
 class LiveStreamController extends GetxController
-    with NetSpeedLogic, UpdateLogic, PlayerLogic {
+    with NetSpeedLogic, UpdateLogic, PlayerLogic, SlidingEventLogic {
   late List<CategoryWithChannels> categoryWithChannels;
 
   // 界面状态
@@ -90,7 +91,7 @@ class LiveStreamController extends GetxController
 
   /// 左侧分类菜单部分 频道分类点击
   void clickLeftMenuCategory(int index) {
-    if(categoryIndex==index){
+    if (categoryIndex == index) {
       return;
     }
     // 保存之前的选中状态
@@ -108,6 +109,7 @@ class LiveStreamController extends GetxController
 
     update();
   }
+
   ///点击左侧分类+没有在左侧弹框选择频道+返回的情况
   void restorePreviousSelection() {
     if (previousCategoryIndex != null && previousChannelIndex != null) {
@@ -116,7 +118,8 @@ class LiveStreamController extends GetxController
       selectCategory(categoryWithChannels, categoryIndex);
 
       if (previousChannelIndex! >= 0 &&
-          previousChannelIndex! < categoryWithChannels[categoryIndex].channels!.length) {
+          previousChannelIndex! <
+              categoryWithChannels[categoryIndex].channels!.length) {
         categoryWithChannels[categoryIndex]
             .channels![previousChannelIndex!]
             .isSelect = true;
@@ -129,6 +132,7 @@ class LiveStreamController extends GetxController
       update();
     }
   }
+
   ///右侧频道部分 切换选台
   void clickRightChannel(int index) {
     channelIndex = index; // 当前频道索引
