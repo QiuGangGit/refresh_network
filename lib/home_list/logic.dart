@@ -107,6 +107,9 @@ class LiveStreamController extends GetxController
     // 清空新分类的频道选中状态
     setChannelFalse(categoryWithChannels[categoryIndex].channels ?? []);
 
+    selectChannel(
+        categoryWithChannels[categoryIndex].channels ?? [], channelIndex);
+
     update();
   }
 
@@ -115,6 +118,7 @@ class LiveStreamController extends GetxController
     if (previousCategoryIndex != null && previousChannelIndex != null) {
       // 恢复分类和频道的选中状态
       categoryIndex = previousCategoryIndex!;
+      channelIndex=previousChannelIndex!;
       selectCategory(categoryWithChannels, categoryIndex);
 
       if (previousChannelIndex! >= 0 &&
@@ -124,6 +128,7 @@ class LiveStreamController extends GetxController
             .channels![previousChannelIndex!]
             .isSelect = true;
       }
+
 
       // 清空之前保存的状态
       previousCategoryIndex = null;

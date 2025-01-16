@@ -21,15 +21,11 @@ class ChannelListDialog extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: IgnorePointer(
-            ignoring: true,
-            child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: (){
-                  Get.back();
-                },
-                child: Container(color: Colors.transparent)),
-          ),
+          child: GestureDetector(
+              onTap: (){
+                Get.back();
+              },
+              child: Container(color: Colors.transparent)),
         ),
         Positioned(
           left: 0,
@@ -87,19 +83,19 @@ class ChannelListDialog extends StatelessWidget {
                   ),
                   Spacer(),
                   Container(
-                    margin: EdgeInsets.only(right: 120.w),
+                    margin: EdgeInsets.only(right: 80.w),
                     child: Row(
                       children: [
                         Icon(
                           CupertinoIcons.play_arrow_solid,
                           color: Color(0xFFE65100), // 设置颜色为黄色
-                          size: 20.w, // 图标大小
+                          size: 9.w, // 图标大小
                         ),
                         SizedBox(width: 2.w,),
-                        Text("当前播放频道:${channelName}",
+                        Text("当前播放频道:  ${channelName}",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 13.sp,
+                              fontSize: 5.sp,
                             )),
                       ],
                     ),

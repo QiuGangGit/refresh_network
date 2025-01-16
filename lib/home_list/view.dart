@@ -79,14 +79,14 @@ class LiveStreamingPage extends StatelessWidget {
                               children: [
                                 Icon(
                                   CupertinoIcons.exclamationmark_circle,
-                                  size: 80.w,
+                                  size: 15.w,
                                   color: Color(0xFFE65100),
                                 ), // 使用 Cupertino 图标
                                 SizedBox(height: 16.w),
                                 Text(
                                   "当前源实效",
                                   style: TextStyle(
-                                      color: Colors.grey, fontSize: 16.sp),
+                                      color: Colors.grey, fontSize: 8.sp),
                                 ),
                               ],
                             ),
@@ -99,6 +99,8 @@ class LiveStreamingPage extends StatelessWidget {
                   bottom: 20,
                   left: MediaQuery.of(context).size.width * 0.5 -
                       (280.w / 2), // 居中计算
+                  right:  MediaQuery.of(context).size.width * 0.5 -
+                      (280.w / 2),
                   child: GetBuilder<LiveStreamController>(builder: (logic) {
                     CategoryWithChannels categoryWithChannels =
                         logic.categoryWithChannels[logic.categoryIndex];
