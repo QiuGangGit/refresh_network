@@ -11,7 +11,22 @@ import 'logic.dart';
 
 mixin SlidingEventLogic on GetxController {
   LiveStreamController get logic => Get.find<LiveStreamController>();
+   //手机屏幕上下滑动事件
+  void handleVerticalDragEnd(DragEndDetails details) {
+    final velocity = details.velocity.pixelsPerSecond.dy; // 获取滑动速度
 
+    if (velocity < 0) {
+      // 向上滑动（下一个频道）
+      logic.switchChannel(logic.categoryWithChannels, true);
+      logic.isShowFailPlay = false;
+      logic.showPopup(); // 每次滑动都触发弹框
+    } else if (velocity > 0) {
+      // 向下滑动（上一个频道）
+      logic.switchChannel(logic.categoryWithChannels, false);
+      logic.isShowFailPlay = false;
+      logic.showPopup(); // 每次滑动都触发弹框
+    }
+  }
   // 主页面的遥控器 获取按键映射的 Actions
   Map<Type, Action<Intent>> getActionsMine(BuildContext context) {
     return {

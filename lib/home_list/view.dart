@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:refresh_network/home_list/utils/RemoteControlActions.dart';
-import 'bean/category_with_channels.dart';
+import 'package:refresh_network/home_list/widget/channel_popup_widget.dart';
 import 'logic.dart';
 import 'widget/download_speed_widget.dart'; // 导入控制器
 
@@ -23,28 +23,13 @@ class LiveStreamingPage extends StatelessWidget {
       body: FocusableActionDetector(
         autofocus: true, // 自动捕获焦点
         shortcuts: RemoteControlActions.shortcuts, // 复用
-        actions: controller.getActionsMine(context,),
+        actions: controller.getActionsMine(
+          context,
+        ),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onVerticalDragEnd: (details) {
-            final velocity = details.velocity.pixelsPerSecond.dy; // 获取滑动速度
-            if (velocity < 0) {
-              // 向上滑动（下一个频道）
-              controller.switchChannel(
-                controller.categoryWithChannels,
-                true,
-              );
-              controller.isShowFailPlay = false;
-              controller.showPopup(); // 每次滑动都触发弹框
-            } else if (velocity > 0) {
-              // 向下滑动（上一个频道）
-              controller.switchChannel(
-                controller.categoryWithChannels,
-                false,
-              );
-              controller.isShowFailPlay = false;
-              controller.showPopup(); // 每次滑动都触发弹框
-            }
+            controller.handleVerticalDragEnd(details); // 处理滑动事件
           },
           child: Stack(
             children: [
@@ -95,105 +80,8 @@ class LiveStreamingPage extends StatelessWidget {
                       : Container(); // 不显示黑色背景
                 },
               ),
-              Positioned(
-                  bottom: 20,
-                  left: MediaQuery.of(context).size.width * 0.5 -
-                      (280.w / 2), // 居中计算
-                  right:  MediaQuery.of(context).size.width * 0.5 -
-                      (280.w / 2),
-                  child: GetBuilder<LiveStreamController>(builder: (logic) {
-                    if(logic.categoryWithChannels.isEmpty){
-                      return Container();
-                    }
-                    CategoryWithChannels? categoryWithChannels =
-                        logic.categoryWithChannels[logic.categoryIndex];
-                    String channelNumber = categoryWithChannels
-                        .channels![logic.channelIndex].channelNumber
-                        .toString();
-                    String channelName = categoryWithChannels
-                        .channels![logic.channelIndex].channelName
-                        .toString();
-                    return logic.showChannelPopup
-                        ? Container(
-                            margin: const EdgeInsets.only(bottom: 20.0),
-                            // 底部间距
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.7), // 半透明背景
-                              borderRadius: BorderRadius.circular(10.0), // 圆角
-                            ),
-                            width: 280,
-                            // 撑满屏幕宽度
-                            height: 80,
-                            // 固定高度
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // 左侧频道号
-                                Text(
-                                  channelNumber,
-                                  style: TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                SizedBox(width: 16.0), // 间距
-                                // 中间频道名称
-                                Expanded(
-                                  child: Text(
-                                    channelName,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                    overflow: TextOverflow.ellipsis, // 超出部分省略号
-                                  ),
-                                ),
-                                // 右侧功能按钮
-                                Row(
-                                  children: [
-                                    // 频道按钮
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.check_circle,
-                                            color: Colors.white, size: 20),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          "频道",
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(width: 16.0), // 间距
-                                    // 换台按钮
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.swap_vert,
-                                            color: Colors.white, size: 20),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          "换台",
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ))
-                        : Container();
-                  })),
+              //切换频道底部弹框
+              ChannelPopupWidget(),
               // 底部弹框显示下一个频道名称
               DownloadSpeedIndicator(),
               //左侧频道分类菜单
