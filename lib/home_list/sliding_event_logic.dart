@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:refresh_network/home_list/utils/DataUtils.dart';
 import 'package:refresh_network/home_list/utils/RemoteControlActions.dart';
 import 'package:refresh_network/home_list/widget/channel_list_widget.dart';
 import 'package:refresh_network/home_list/widget/decoder_options_widget.dart';
@@ -11,126 +11,212 @@ import 'logic.dart';
 
 mixin SlidingEventLogic on GetxController {
   LiveStreamController get logic => Get.find<LiveStreamController>();
+
   // 主页面的遥控器 获取按键映射的 Actions
   Map<Type, Action<Intent>> getActionsMine(BuildContext context) {
     return {
       MoveUpIntent: CallbackAction<MoveUpIntent>(
         onInvoke: (intent) {
-          logic.switchChannel(logic.categoryWithChannels, true); // 切换到上一个频道
+          //切换台UP==下滑
+          logic.switchChannel(
+            logic.categoryWithChannels,
+            false,
+          );
+          logic.isShowFailPlay = false;
+          logic.showPopup(); // 每次滑动都触发弹框
           return null;
         },
       ),
       MoveDownIntent: CallbackAction<MoveDownIntent>(
         onInvoke: (intent) {
-          logic.switchChannel(logic.categoryWithChannels, false); // 切换到下一个频道
-          return null;
+          // 向上滑动（下一个频道）
+          logic.switchChannel(
+            logic.categoryWithChannels,
+            true,
+          );
+          logic.isShowFailPlay = false;
+          logic.showPopup(); // 每次滑动都触发弹框
         },
       ),
       OpenLeftDrawerIntent: CallbackAction<OpenLeftDrawerIntent>(
         onInvoke: (intent) {
-          print('打开左侧弹窗');
-          showChannelList(context); // 打开左侧菜单
+          // 切换焦点到子分类列表
+          logic.showDecoderOptions(context);
+          update(); // 刷新UI
           return null;
         },
       ),
       OpenRightDrawerIntent: CallbackAction<OpenRightDrawerIntent>(
         onInvoke: (intent) {
-          print('打开右侧弹窗');
-          showDecoderOptions(context); // 打开右侧菜单
-          return null;
-        },
-      ),
-      ConfirmIntent: CallbackAction<ConfirmIntent>(
-        onInvoke: (intent) {
-          print('确定键被按下');
+          // 切换焦点到分类列表
+          logic.showChannelList(context);
+          update(); // 刷新UI
           return null;
         },
       ),
       BackIntent: CallbackAction<BackIntent>(
         onInvoke: (intent) {
-          print('返回键被按下');
-          Navigator.pop(context); // 返回上一个页面
+          Navigator.pop(context); // 关闭弹窗
           return null;
         },
       ),
     };
   }
+
   // 左侧弹窗选择频道的遥控器事件 获取按键映射的 Actions
   Map<Type, Action<Intent>> getActionsLeftMenu(BuildContext context) {
+    bool isCategoryFocused = true; // 焦点是否在分类列表
     return {
       MoveUpIntent: CallbackAction<MoveUpIntent>(
         onInvoke: (intent) {
-          logic.switchChannel(logic.categoryWithChannels, true); // 切换到上一个频道
+          if (isCategoryFocused) {
+            logic.clickLeftMenuCategory(logic.categoryIndex == 0
+                ? logic.categoryWithChannels.length - 1
+                : logic.categoryIndex - 1);
+          } else {
+            saveCurrentSelection();
+            switchToPreviousChannel();
+          }
+          update(); // 刷新UI
           return null;
         },
       ),
       MoveDownIntent: CallbackAction<MoveDownIntent>(
         onInvoke: (intent) {
-          logic.switchChannel(logic.categoryWithChannels, false); // 切换到下一个频道
+          if (isCategoryFocused) {
+            logic.clickLeftMenuCategory(
+                logic.categoryIndex == logic.categoryWithChannels.length - 1
+                    ? 0
+                    : logic.categoryIndex + 1);
+          } else {
+            saveCurrentSelection();
+            switchToNextChannel(); // 下滑切换到下一个频道
+          }
+          update(); // 刷新UI
           return null;
         },
       ),
       OpenLeftDrawerIntent: CallbackAction<OpenLeftDrawerIntent>(
         onInvoke: (intent) {
-          print('打开左侧弹窗');
-          showChannelList(context); // 打开左侧菜单
+          // 切换焦点到分类列表
+          isCategoryFocused = true;
+          update(); // 刷新UI
           return null;
         },
       ),
       OpenRightDrawerIntent: CallbackAction<OpenRightDrawerIntent>(
         onInvoke: (intent) {
-          print('打开右侧弹窗');
-          showDecoderOptions(context); // 打开右侧菜单
+          // 切换焦点到子分类列表
+          isCategoryFocused = false;
+          update(); // 刷新UI
           return null;
         },
       ),
       ConfirmIntent: CallbackAction<ConfirmIntent>(
         onInvoke: (intent) {
-          print('确定键被按下');
+          if (!isCategoryFocused) {
+            // 在子分类列表中按下确定键，选择当前频道
+            logic.setupPlayer(DataUtils.getCurrentStreamUrl(
+                logic.categoryWithChannels,
+                logic.categoryIndex,
+                logic.channelIndex)); //准备数据播放
+            Navigator.pop(context); // 退出弹窗
+          }
           return null;
         },
       ),
       BackIntent: CallbackAction<BackIntent>(
         onInvoke: (intent) {
-          print('返回键被按下');
-          Navigator.pop(context); // 返回上一个页面
+          logic.restorePreviousSelection();
+          Navigator.pop(context); // 关闭弹窗
           return null;
         },
       ),
     };
   }
+
   // 右侧弹窗选择频道的遥控器事件 获取按键映射的 Actions
   Map<Type, Action<Intent>> getActionsRightMenu(BuildContext context) {
+    bool isCategoryFocused = true; // 焦点是否在分类列表
     return {
       MoveUpIntent: CallbackAction<MoveUpIntent>(
         onInvoke: (intent) {
-          logic.switchChannel(logic.categoryWithChannels, true); // 切换到上一个频道
+          if (isCategoryFocused) {
+            logic.settingIndex == 1
+                ? logic.settingIndex = 0
+                : logic.settingIndex = 0;
+            logic.update();
+          } else {
+            // 更新 currentSourceIndex 或 decodeIndex，保证循环切换
+            if (logic.settingIndex == 0) {
+              var channel = logic.categoryWithChannels[logic.categoryIndex]
+                  .channels![logic.channelIndex];
+              channel.currentSourceIndex = (channel.currentSourceIndex -
+                      1 +
+                      channel.channelSource!.length) %
+                  channel.channelSource!.length;
+            } else {
+              logic.decodeIndex = (logic.decodeIndex -
+                      1 +
+                      logic.sourceDecodingChannels.length) %
+                  logic.sourceDecodingChannels.length;
+            }
+            Get.back(); // 关闭对话框
+          }
+          update(); // 刷新UI
           return null;
         },
       ),
       MoveDownIntent: CallbackAction<MoveDownIntent>(
         onInvoke: (intent) {
-          logic.switchChannel(logic.categoryWithChannels, false); // 切换到下一个频道
+          if (isCategoryFocused) {
+            logic.settingIndex == 1
+                ? logic.settingIndex = 0
+                : logic.settingIndex = 0;
+            logic.update();
+          } else {
+            // 更新 currentSourceIndex 或 decodeIndex，确保下标加1并且循环
+            if (logic.settingIndex == 0) {
+              var channel = logic.categoryWithChannels[logic.categoryIndex]
+                  .channels![logic.channelIndex];
+              // 下标加1，并确保循环
+              channel.currentSourceIndex = (channel.currentSourceIndex + 1) %
+                  channel.channelSource!.length;
+            } else {
+              // 下标加1，并确保循环
+              logic.decodeIndex =
+                  (logic.decodeIndex + 1) % logic.sourceDecodingChannels.length;
+            }
+            Get.back(); // 关闭对话框
+          }
+          update(); // 刷新UI
           return null;
         },
       ),
       OpenLeftDrawerIntent: CallbackAction<OpenLeftDrawerIntent>(
         onInvoke: (intent) {
-          print('打开左侧弹窗');
-          showChannelList(context); // 打开左侧菜单
+          isCategoryFocused = false;
+          update(); // 刷新UI
           return null;
         },
       ),
       OpenRightDrawerIntent: CallbackAction<OpenRightDrawerIntent>(
         onInvoke: (intent) {
-          print('打开右侧弹窗');
-          showDecoderOptions(context); // 打开右侧菜单
+          isCategoryFocused = true;
+          update(); // 刷新UI
           return null;
         },
       ),
       ConfirmIntent: CallbackAction<ConfirmIntent>(
         onInvoke: (intent) {
           print('确定键被按下');
+          if (!isCategoryFocused) {
+            logic.setupPlayer(DataUtils.getCurrentStreamUrl(
+                logic.categoryWithChannels,
+                logic.categoryIndex,
+                logic.channelIndex)); //准备数据播放
+            Navigator.pop(context); // 退出弹窗
+          }
           return null;
         },
       ),
@@ -143,9 +229,9 @@ mixin SlidingEventLogic on GetxController {
       ),
     };
   }
+
   // 显示频道列表
   void showChannelList(BuildContext context) {
-    bool isCategoryFocused = true; // 焦点是否在分类列表
     showDialog(
       context: context,
       barrierColor: Colors.transparent,
@@ -153,77 +239,7 @@ mixin SlidingEventLogic on GetxController {
         return FocusableActionDetector(
             autofocus: true, // 捕获焦点
             shortcuts: RemoteControlActions.shortcuts, // 复用
-            actions: <Type, Action<Intent>>{
-              MoveUpIntent: CallbackAction<MoveUpIntent>(
-                onInvoke: (intent) {
-                  if (isCategoryFocused) {
-                    logic.clickLeftMenuCategory(logic.categoryIndex==0?logic.categoryWithChannels.length-1:logic.categoryIndex-1);
-                  } else {
-                    List<ChannelWithSelection>? channels=logic.categoryWithChannels[logic.categoryIndex].channels;
-                    if(logic.categoryIndex==0){
-                      logic.channelIndex = logic.channelIndex==0?channels!.length-1:logic.channelIndex-1; // 当前频道索引
-                    }else{
-
-                    }
-
-                    // 更新选中状态
-                    logic.selectCategory(logic.categoryWithChannels, logic.categoryIndex);
-                    logic.selectChannel(
-                        logic.categoryWithChannels[logic.categoryIndex].channels ?? [], logic.channelIndex);
-                    logic.update();
-                  }
-                  update(); // 刷新UI
-                  return null;
-                },
-              ),
-              MoveDownIntent: CallbackAction<MoveDownIntent>(
-                onInvoke: (intent) {
-                  if (isCategoryFocused) {
-                    // 焦点在分类列表
-                    // currentCategoryIndex =
-                    //     (currentCategoryIndex + 1) % controller.categories.length;
-                  } else {
-                    // 焦点在子分类列表
-                    // currentSubCategoryIndex = (currentSubCategoryIndex + 1) %
-                    //     controller.channels[currentCategoryIndex].length;
-                  }
-                  update(); // 刷新UI
-                  return null;
-                },
-              ),
-              MoveLeftIntent: CallbackAction<MoveLeftIntent>(
-                onInvoke: (intent) {
-                  // 切换焦点到分类列表
-                  isCategoryFocused = true;
-                  update(); // 刷新UI
-                  return null;
-                },
-              ),
-              MoveRightIntent: CallbackAction<MoveRightIntent>(
-                onInvoke: (intent) {
-                  // 切换焦点到子分类列表
-                  isCategoryFocused = false;
-                  update(); // 刷新UI
-                  return null;
-                },
-              ),
-              ConfirmIntent: CallbackAction<ConfirmIntent>(
-                onInvoke: (intent) {
-                  if (!isCategoryFocused) {
-                    // 在子分类列表中按下确定键，选择当前频道
-                    // controller.clickRightChannel(index);
-                    Navigator.pop(context); // 退出弹窗
-                  }
-                  return null;
-                },
-              ),
-              BackIntent: CallbackAction<BackIntent>(
-                onInvoke: (intent) {
-                  Navigator.pop(context); // 关闭弹窗
-                  return null;
-                },
-              ),
-            },
+            actions: getActionsLeftMenu(context),
             child: ChannelListDialog());
       },
     );
@@ -234,8 +250,71 @@ mixin SlidingEventLogic on GetxController {
       context: context,
       barrierColor: Colors.transparent,
       builder: (BuildContext context) {
-        return const DecoderOptionsDialog();
+        return  FocusableActionDetector(
+            autofocus: true, // 捕获焦点
+            shortcuts: RemoteControlActions.shortcuts, // 复用
+            actions: getActionsRightMenu(context),
+        child: DecoderOptionsDialog());
       },
     );
+  }
+
+  ///切换到上一个频道
+  void switchToPreviousChannel() {
+    if (logic.categoryIndex == 0 && logic.channelIndex == 0) {
+      // 第一分类第一个频道，切换到最后一个分类的最后一个频道
+      logic.categoryIndex = logic.categoryWithChannels.length - 1;
+      logic.channelIndex =
+          logic.categoryWithChannels[logic.categoryIndex].channels!.length - 1;
+    } else if (logic.channelIndex == 0) {
+      // 当前分类的第一个频道，切换到前一个分类的最后一个频道
+      logic.categoryIndex -= 1;
+      logic.channelIndex =
+          logic.categoryWithChannels[logic.categoryIndex].channels!.length - 1;
+    } else {
+      // 当前分类内部切换频道
+      logic.channelIndex -= 1;
+    }
+
+    // 更新选中状态
+    logic.selectCategory(logic.categoryWithChannels, logic.categoryIndex);
+    logic.selectChannel(
+        logic.categoryWithChannels[logic.categoryIndex].channels ?? [],
+        logic.channelIndex);
+
+    update();
+  }
+
+  ///切换到下一个频道
+  void switchToNextChannel() {
+    // 获取当前分类的频道列表
+    List<ChannelWithSelection>? channels =
+        logic.categoryWithChannels[logic.categoryIndex].channels;
+
+    if (channels != null && channels.isNotEmpty) {
+      // 如果当前频道是最后一个，切换到下一个分类的第一个频道
+      if (logic.channelIndex == channels.length - 1) {
+        // 如果已经是最后一个分类，切换回第一个分类的第一个频道
+        if (logic.categoryIndex == logic.categoryWithChannels.length - 1) {
+          logic.categoryIndex = 0; // 回到第一个分类
+        } else {
+          logic.categoryIndex += 1; // 切换到下一个分类
+        }
+        logic.channelIndex = 0; // 切换到新分类的第一个频道
+      } else {
+        // 否则切换到下一个频道
+        logic.channelIndex += 1;
+      }
+
+      // 更新选中的分类和频道
+      logic.selectCategory(logic.categoryWithChannels, logic.categoryIndex);
+      logic.selectChannel(channels, logic.channelIndex);
+    }
+  }
+
+  ///保存当前下标
+  void saveCurrentSelection() {
+    logic.previousCategoryIndex = logic.categoryIndex;
+    logic.previousChannelIndex = logic.channelIndex;
   }
 }

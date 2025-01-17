@@ -10,7 +10,7 @@ class DownloadSpeedIndicator extends StatelessWidget {
       return Positioned(
         top: 20.0,
         right: 80.0,
-        child: controller.isBuffering
+        child: controller.isBuffering&&controller.downloadSpeed>0
             ? Container(
           padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
           decoration: BoxDecoration(

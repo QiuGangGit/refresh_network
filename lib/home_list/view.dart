@@ -23,7 +23,7 @@ class LiveStreamingPage extends StatelessWidget {
       body: FocusableActionDetector(
         autofocus: true, // 自动捕获焦点
         shortcuts: RemoteControlActions.shortcuts, // 复用
-        actions: controller.getActionsMine(context),
+        actions: controller.getActionsMine(context,),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onVerticalDragEnd: (details) {
