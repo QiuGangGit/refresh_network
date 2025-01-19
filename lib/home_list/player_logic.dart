@@ -176,4 +176,18 @@ mixin PlayerLogic on GetxController {
       channel.isSelect = false;
     }
   }
+  ///设置分类和频道都是false
+  void resetSelection(List<CategoryWithChannels> categoryWithChannels) {
+    for (var category in categoryWithChannels) {
+      // 将分类的 isSelect 设置为 false
+      category.isSelect = false;
+
+      // 遍历分类中的频道，并将每个频道的 isSelect 设置为 false
+      if (category.channels != null) {
+        for (var channel in category.channels!) {
+          channel.isSelect = false;
+        }
+      }
+    }
+  }
 }

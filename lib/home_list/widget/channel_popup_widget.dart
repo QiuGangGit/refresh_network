@@ -17,28 +17,32 @@ class ChannelPopupWidget extends StatelessWidget {
 
       CategoryWithChannels categoryWithChannels =
           logic.categoryWithChannels[logic.categoryIndex];
-      String channelNumber = categoryWithChannels
-          .channels![logic.channelIndex].channelNumber
-          .toString();
-      String channelName = categoryWithChannels
-          .channels![logic.channelIndex].channelName
-          .toString();
+      String channelNumber = (categoryWithChannels.channels != null &&
+          logic.channelIndex >= 0 &&
+          logic.channelIndex < categoryWithChannels.channels!.length)
+          ? categoryWithChannels.channels![logic.channelIndex].channelNumber?.toString() ?? ""
+          : "";
+      String channelName = (categoryWithChannels.channels != null &&
+          logic.channelIndex >= 0 &&
+          logic.channelIndex < categoryWithChannels.channels!.length)
+          ? categoryWithChannels.channels![logic.channelIndex].channelName?.toString() ?? ""
+          : "";
 
       return logic.showChannelPopup
           ? Positioned(
               bottom: 20,
-              left: MediaQuery.of(context).size.width * 0.5 - (280.w / 2),
-              right: MediaQuery.of(context).size.width * 0.5 - (280.w / 2),
+              left: MediaQuery.of(context).size.width * 0.5 - (140.w / 2),
+              right: MediaQuery.of(context).size.width * 0.5 - (140.w / 2),
               child: Container(
-                margin: const EdgeInsets.only(bottom: 20.0),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 10.0),
+                margin:  EdgeInsets.only(bottom: 18.w),
+                padding:  EdgeInsets.symmetric(
+                    horizontal: 16.w, vertical: 10.w),
                 decoration: BoxDecoration(
                   color: Colors.red.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.w),
                 ),
-                width: 280,
-                height: 80,
+                width: 140.w,
+                height: 45.w,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -46,17 +50,17 @@ class ChannelPopupWidget extends StatelessWidget {
                     Text(
                       channelNumber,
                       style: TextStyle(
-                          fontSize: 36.sp,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.white),
                     ),
-                    SizedBox(width: 16.w),
+                    SizedBox(width: 8.w),
                     // 中间频道名称
                     Expanded(
                       child: Text(
                         channelName,
                         style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: 9.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
                         overflow: TextOverflow.ellipsis,
@@ -70,24 +74,24 @@ class ChannelPopupWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.check_circle,
-                                color: Colors.white, size: 20.w),
-                            SizedBox(height: 4.w),
+                                color: Colors.white, size: 10.w),
+                            SizedBox(height: 2.w),
                             Text("频道",
                                 style: TextStyle(
-                                    fontSize: 12.sp, color: Colors.white)),
+                                    fontSize: 6.sp, color: Colors.white)),
                           ],
                         ),
-                        SizedBox(width: 16.0),
+                        SizedBox(width: 8.w),
                         // 换台按钮
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.swap_vert,
-                                color: Colors.white, size: 20.w),
-                            SizedBox(height: 4.w),
+                                color: Colors.white, size: 10.w),
+                            SizedBox(height: 2.w),
                             Text("换台",
                                 style: TextStyle(
-                                    fontSize: 12.sp, color: Colors.white)),
+                                    fontSize: 6.sp, color: Colors.white)),
                           ],
                         ),
                       ],

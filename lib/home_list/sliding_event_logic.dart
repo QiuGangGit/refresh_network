@@ -11,7 +11,8 @@ import 'logic.dart';
 
 mixin SlidingEventLogic on GetxController {
   LiveStreamController get logic => Get.find<LiveStreamController>();
-   //手机屏幕上下滑动事件
+
+  //手机屏幕上下滑动事件
   void handleVerticalDragEnd(DragEndDetails details) {
     final velocity = details.velocity.pixelsPerSecond.dy; // 获取滑动速度
 
@@ -27,6 +28,7 @@ mixin SlidingEventLogic on GetxController {
       logic.showPopup(); // 每次滑动都触发弹框
     }
   }
+
   // 主页面的遥控器 获取按键映射的 Actions
   Map<Type, Action<Intent>> getActionsMine(BuildContext context) {
     return {
@@ -53,16 +55,18 @@ mixin SlidingEventLogic on GetxController {
           logic.showPopup(); // 每次滑动都触发弹框
         },
       ),
-      OpenLeftDrawerIntent: CallbackAction<OpenLeftDrawerIntent>(
+      MoveLeftIntent: CallbackAction<MoveLeftIntent>(
         onInvoke: (intent) {
+          print("----111------");
           // 切换焦点到子分类列表
           logic.showDecoderOptions(context);
           update(); // 刷新UI
           return null;
         },
       ),
-      OpenRightDrawerIntent: CallbackAction<OpenRightDrawerIntent>(
+      MoveRightIntent: CallbackAction<MoveRightIntent>(
         onInvoke: (intent) {
+          print("----22222------");
           // 切换焦点到分类列表
           logic.showChannelList(context);
           update(); // 刷新UI
@@ -71,6 +75,7 @@ mixin SlidingEventLogic on GetxController {
       ),
       BackIntent: CallbackAction<BackIntent>(
         onInvoke: (intent) {
+          print("----22222------");
           Navigator.pop(context); // 关闭弹窗
           return null;
         },
@@ -80,14 +85,16 @@ mixin SlidingEventLogic on GetxController {
 
   // 左侧弹窗选择频道的遥控器事件 获取按键映射的 Actions
   Map<Type, Action<Intent>> getActionsLeftMenu(BuildContext context) {
-    bool isCategoryFocused = true; // 焦点是否在分类列表
+    bool isCategoryFocused = false; // 焦点是否在分类列表
     return {
       MoveUpIntent: CallbackAction<MoveUpIntent>(
         onInvoke: (intent) {
           if (isCategoryFocused) {
-            logic.clickLeftMenuCategory(logic.categoryIndex == 0
-                ? logic.categoryWithChannels.length - 1
-                : logic.categoryIndex - 1);
+            logic.clickLeftMenuCategory(
+                logic.categoryIndex == 0
+                    ? logic.categoryWithChannels.length - 1
+                    : logic.categoryIndex - 1,
+                savesaveCurrent: false);
           } else {
             saveCurrentSelection();
             switchToPreviousChannel();
@@ -102,7 +109,8 @@ mixin SlidingEventLogic on GetxController {
             logic.clickLeftMenuCategory(
                 logic.categoryIndex == logic.categoryWithChannels.length - 1
                     ? 0
-                    : logic.categoryIndex + 1);
+                    : logic.categoryIndex + 1,
+                savesaveCurrent: false);
           } else {
             saveCurrentSelection();
             switchToNextChannel(); // 下滑切换到下一个频道
@@ -111,25 +119,39 @@ mixin SlidingEventLogic on GetxController {
           return null;
         },
       ),
-      OpenLeftDrawerIntent: CallbackAction<OpenLeftDrawerIntent>(
+      MoveLeftIntent: CallbackAction<MoveLeftIntent>(
         onInvoke: (intent) {
           // 切换焦点到分类列表
-          isCategoryFocused = true;
-          update(); // 刷新UI
+          if (isCategoryFocused == false) {
+            isCategoryFocused = true;
+            saveCurrentSelection();
+            logic.setChannelFalse(
+                logic.categoryWithChannels[logic.categoryIndex].channels ?? []);
+            update(); // 刷新UI
+          }
+
           return null;
         },
       ),
-      OpenRightDrawerIntent: CallbackAction<OpenRightDrawerIntent>(
+      MoveRightIntent: CallbackAction<MoveRightIntent>(
         onInvoke: (intent) {
           // 切换焦点到子分类列表
-          isCategoryFocused = false;
-          update(); // 刷新UI
+          if (isCategoryFocused) {
+            isCategoryFocused = false;
+            // 保存之前的选中状态
+
+            logic.categoryWithChannels[logic.categoryIndex].channels?[0]
+                .isSelect = true;
+            update(); // 刷新UI
+          }
+
           return null;
         },
       ),
       ConfirmIntent: CallbackAction<ConfirmIntent>(
         onInvoke: (intent) {
           if (!isCategoryFocused) {
+            deleteCurrentSelection();
             // 在子分类列表中按下确定键，选择当前频道
             logic.setupPlayer(DataUtils.getCurrentStreamUrl(
                 logic.categoryWithChannels,
@@ -142,6 +164,7 @@ mixin SlidingEventLogic on GetxController {
       ),
       BackIntent: CallbackAction<BackIntent>(
         onInvoke: (intent) {
+          logic.resetSelection(logic.categoryWithChannels);
           logic.restorePreviousSelection();
           Navigator.pop(context); // 关闭弹窗
           return null;
@@ -159,7 +182,7 @@ mixin SlidingEventLogic on GetxController {
           if (isCategoryFocused) {
             logic.settingIndex == 1
                 ? logic.settingIndex = 0
-                : logic.settingIndex = 0;
+                : logic.settingIndex = 1;
             logic.update();
           } else {
             // 更新 currentSourceIndex 或 decodeIndex，保证循环切换
@@ -187,7 +210,7 @@ mixin SlidingEventLogic on GetxController {
           if (isCategoryFocused) {
             logic.settingIndex == 1
                 ? logic.settingIndex = 0
-                : logic.settingIndex = 0;
+                : logic.settingIndex = 1;
             logic.update();
           } else {
             // 更新 currentSourceIndex 或 decodeIndex，确保下标加1并且循环
@@ -208,14 +231,14 @@ mixin SlidingEventLogic on GetxController {
           return null;
         },
       ),
-      OpenLeftDrawerIntent: CallbackAction<OpenLeftDrawerIntent>(
+      MoveLeftIntent: CallbackAction<MoveLeftIntent>(
         onInvoke: (intent) {
           isCategoryFocused = false;
           update(); // 刷新UI
           return null;
         },
       ),
-      OpenRightDrawerIntent: CallbackAction<OpenRightDrawerIntent>(
+      MoveRightIntent: CallbackAction<MoveRightIntent>(
         onInvoke: (intent) {
           isCategoryFocused = true;
           update(); // 刷新UI
@@ -265,11 +288,11 @@ mixin SlidingEventLogic on GetxController {
       context: context,
       barrierColor: Colors.transparent,
       builder: (BuildContext context) {
-        return  FocusableActionDetector(
+        return FocusableActionDetector(
             autofocus: true, // 捕获焦点
             shortcuts: RemoteControlActions.shortcuts, // 复用
             actions: getActionsRightMenu(context),
-        child: DecoderOptionsDialog());
+            child: DecoderOptionsDialog());
       },
     );
   }
@@ -288,7 +311,8 @@ mixin SlidingEventLogic on GetxController {
           logic.categoryWithChannels[logic.categoryIndex].channels!.length - 1;
     } else {
       // 当前分类内部切换频道
-      logic.channelIndex -= 1;
+
+      logic.channelIndex > 0 ? logic.channelIndex -= 1 : null;
     }
 
     // 更新选中状态
@@ -329,7 +353,16 @@ mixin SlidingEventLogic on GetxController {
 
   ///保存当前下标
   void saveCurrentSelection() {
-    logic.previousCategoryIndex = logic.categoryIndex;
-    logic.previousChannelIndex = logic.channelIndex;
+    if (logic.previousCategoryIndex == null &&
+        logic.previousChannelIndex == null) {
+      logic.previousCategoryIndex = logic.categoryIndex;
+      logic.previousChannelIndex = logic.channelIndex;
+    }
+  }
+
+  ///清除记录
+  void deleteCurrentSelection() {
+    logic.previousCategoryIndex = null;
+    logic.previousChannelIndex = null;
   }
 }

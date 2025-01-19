@@ -17,7 +17,7 @@ class ChannelListDialog extends StatelessWidget {
     double halfWidth = width / 2;
     double quarterWidth = width / 4;
     CategoryWithChannels categoryWithChannels=Get.find<LiveStreamController>().categoryWithChannels[Get.find<LiveStreamController>().categoryIndex];
-    String channelName=categoryWithChannels.channels![Get.find<LiveStreamController>().channelIndex].channelName.toString();
+    String channelName=categoryWithChannels.channels?[Get.find<LiveStreamController>().channelIndex??0].channelName.toString()??"";
     return Stack(
       children: [
         Positioned.fill(

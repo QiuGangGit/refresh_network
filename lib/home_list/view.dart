@@ -64,14 +64,14 @@ class LiveStreamingPage extends StatelessWidget {
                               children: [
                                 Icon(
                                   CupertinoIcons.exclamationmark_circle,
-                                  size: 15.w,
+                                  size: 18.w,
                                   color: Color(0xFFE65100),
                                 ), // 使用 Cupertino 图标
-                                SizedBox(height: 16.w),
+                                SizedBox(height: 9.w),
                                 Text(
-                                  "当前源实效",
+                                  "当前源失效",
                                   style: TextStyle(
-                                      color: Colors.grey, fontSize: 8.sp),
+                                      color: Colors.white, fontSize: 8.sp),
                                 ),
                               ],
                             ),

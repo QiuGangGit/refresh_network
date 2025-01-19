@@ -11,18 +11,18 @@ class DownloadSpeedIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<LiveStreamController>(builder: (controller) {
       return Positioned(
-        top: 20.0,
-        right: 80.0,
+        top: 20.w,
+        right: 35.w,
         child: controller.isBuffering&&controller.downloadSpeed>0
             ? Container(
           padding: EdgeInsets.symmetric(horizontal: 10.0.w, vertical: 5.0.w),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.7),
+            color: Colors.red.withOpacity(0.7),
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
-            'Speed: ${controller.downloadSpeed.toStringAsFixed(1)} KB/s',
-            style: TextStyle(color: Colors.white, fontSize: 14.sp),
+            '${controller.downloadSpeed.toStringAsFixed(1)} KB/s',
+            style: TextStyle(color: Colors.white, fontSize: 7.sp),
           ),
         )
             : const SizedBox.shrink(), // 当不缓冲时不显示

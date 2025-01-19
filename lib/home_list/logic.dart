@@ -89,15 +89,18 @@ class LiveStreamController extends GetxController
   }
 
   /// 左侧分类菜单部分 频道分类点击
-  void clickLeftMenuCategory(int index) {
+  void clickLeftMenuCategory(int index,{savesaveCurrent=true}) {
     if (categoryIndex == index) {
       return;
     }
     // 保存之前的选中状态
-    previousCategoryIndex = categoryIndex;
-    previousChannelIndex = categoryWithChannels[categoryIndex]
-        .channels
-        ?.indexWhere((channel) => channel.isSelect == true);
+    if(savesaveCurrent){
+      previousCategoryIndex = categoryIndex;
+      previousChannelIndex = categoryWithChannels[categoryIndex]
+          .channels
+          ?.indexWhere((channel) => channel.isSelect == true);
+    }
+
 
     // 更新为新分类
     categoryIndex = index;
@@ -124,7 +127,7 @@ class LiveStreamController extends GetxController
           previousChannelIndex! <
               categoryWithChannels[categoryIndex].channels!.length) {
         categoryWithChannels[categoryIndex]
-            .channels![previousChannelIndex!]
+            .channels![channelIndex!]
             .isSelect = true;
       }
 
