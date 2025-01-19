@@ -23,6 +23,7 @@ class ChannelListDialog extends StatelessWidget {
         Positioned.fill(
           child: GestureDetector(
               onTap: (){
+                Get.find<LiveStreamController>().restorePreviousSelection();
                 Get.back();
               },
               child: Container(color: Colors.transparent)),

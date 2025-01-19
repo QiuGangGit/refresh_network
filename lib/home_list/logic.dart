@@ -106,8 +106,8 @@ class LiveStreamController extends GetxController
     // 清空新分类的频道选中状态
     setChannelFalse(categoryWithChannels[categoryIndex].channels ?? []);
 
-    selectChannel(
-        categoryWithChannels[categoryIndex].channels ?? [], channelIndex);
+    // selectChannel(
+    //     categoryWithChannels[categoryIndex].channels ?? [], channelIndex);
 
     update();
   }
