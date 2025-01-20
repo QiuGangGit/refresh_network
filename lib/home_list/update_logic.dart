@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
@@ -13,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../request/base_response.dart';
 import '../serivice/api_service.dart';
 import 'bean/UpdateBean.dart';
+import 'logic.dart';
 
 mixin UpdateLogic on GetxController {
   @override
@@ -21,17 +23,17 @@ mixin UpdateLogic on GetxController {
   }
 
   Future<void> checkForUpdates() async {
-
     String currentVersion = await getAppVersion(); // 当前版本号
     AppUpdateBean? appUpdateBean =
-    await ApiService.appVersionCheck(currentVersion);
+        await ApiService.appVersionCheck(currentVersion);
 
-    if (_shouldUpdate(currentVersion, appUpdateBean?.appversion??currentVersion)) {
+    if (_shouldUpdate(
+        currentVersion, appUpdateBean?.appversion ?? currentVersion)) {
       _showUpdateDialog(
         Get.context!,
-        appUpdateBean?.isForceUpdate??false,
-        appUpdateBean?.appContent??"",
-        ApiConfig.baseUrl+appUpdateBean!.appDownloadUrl??"",
+        appUpdateBean?.isForceUpdate ?? false,
+        appUpdateBean?.appContent ?? "",
+        appUpdateBean!.appDownloadUrl ?? "",
       );
     }
   }
@@ -43,42 +45,60 @@ mixin UpdateLogic on GetxController {
 
   void _showUpdateDialog(BuildContext context, bool isForceUpdate,
       String message, String updateUrl) {
-    showDialog(
-      context: context,
-      barrierDismissible: !isForceUpdate, // 如果是强制更新，禁止点击外部关闭
-      builder: (BuildContext context) {
+    Get.dialog(
+      GetBuilder<LiveStreamController>(builder: (logic) {
         return AlertDialog(
           title: const Text("有更新可用"),
-          content: Text(message),
+          content: isDownloading
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text("下载中，请稍候..."),
+                    SizedBox(height: 16.w),
+                    LinearProgressIndicator(
+                      value: logic.downloadProgress,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.deepOrange),
+                    ),
+                    SizedBox(height: 8.w),
+                    Text(
+                        "${(logic.downloadProgress * 100).toStringAsFixed(1)}%"),
+                  ],
+                )
+              : Text(message),
           actions: [
-            if (!isForceUpdate)
+            if (!isForceUpdate && !isDownloading)
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // 非强制更新时允许关闭弹窗
                 },
                 child: const Text("取消"),
               ),
-            TextButton(
-              onPressed: () {
-                startUpdate(updateUrl); // 跳转到更新链接
-              },
-              child: const Text("更新"),
-            ),
+            if (!isDownloading)
+              TextButton(
+                onPressed: () async {
+                  isDownloading = true;
+                  update();
+                  startUpdate(updateUrl);
+                },
+                child: const Text("更新"),
+              ),
           ],
         );
-      },
+      }),
+      barrierDismissible: !isForceUpdate, // 如果是强制更新，禁止点击外部关闭
     );
   }
 
   double downloadProgress = 0.0; // 下载进度
   String apkFilePath = ''; // 下载后的 APK 文件路径
-
+  bool isDownloading = false; // 是否正在下载
   void startUpdate(String url) async {
     try {
       // 获取临时目录
       Directory tempDir = await getTemporaryDirectory();
       String savePath = "${tempDir.path}/update.apk";
-
+      print("----------$url");
       // 开始下载
       Dio dio = Dio();
       await dio.download(
@@ -86,6 +106,7 @@ mixin UpdateLogic on GetxController {
         savePath,
         onReceiveProgress: (received, total) {
           downloadProgress = received / total; // 计算下载进度
+
           update();
         },
       );
@@ -95,7 +116,9 @@ mixin UpdateLogic on GetxController {
       update();
       // 安装 APK
       installApk();
+      isDownloading = false;
     } catch (e) {
+      isDownloading = false;
       print("Error during update: $e");
     }
   }
@@ -107,30 +130,58 @@ mixin UpdateLogic on GetxController {
           .catchError((e) => print("Install failed: $e"));
     }
   }
+
   Future<String> getAppVersion() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    return packageInfo.version;  // 获取当前应用的版本
+    return packageInfo.version; // 获取当前应用的版本
   }
+
   void sendOnline() async {
     final prefs = await SharedPreferences.getInstance();
     String? qrCodeUrl = prefs.getString('qrCodeUrl') ?? "";
     BaseResponse? baseResponse =
-    await ApiService.appHotelDeviceOnline(qrCodeUrl, "1");
+        await ApiService.appHotelDeviceOnline(qrCodeUrl, "1");
     if (baseResponse?.code == 0) {
       print("------------设备上线了");
     } else {
       print("------------${baseResponse?.msg}");
     }
   }
+
   void sendOffline() async {
     final prefs = await SharedPreferences.getInstance();
     String? qrCodeUrl = prefs.getString('qrCodeUrl') ?? "";
     BaseResponse? baseResponse =
-    await ApiService.appHotelDeviceOnline(qrCodeUrl, "0");
+        await ApiService.appHotelDeviceOnline(qrCodeUrl, "0");
     if (baseResponse?.code == 0) {
       print("------------设备离线了");
     } else {
       print("------------${baseResponse?.msg}");
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Update Page")),
+      body: Center(
+        child: downloadProgress > 0 && downloadProgress < 1
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                      "Downloading... ${(downloadProgress * 100).toStringAsFixed(1)}%"),
+                  SizedBox(height: 20),
+                  LinearProgressIndicator(value: downloadProgress),
+                ],
+              )
+            : ElevatedButton(
+                onPressed: () {
+                  startUpdate("https://example.com/app.apk"); // 替换为实际 APK 链接
+                },
+                child: Text("Start Update"),
+              ),
+      ),
+    );
   }
 }

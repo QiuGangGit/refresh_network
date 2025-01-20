@@ -21,11 +21,12 @@ class SplashLogic extends GetxController {
 
   void appAuthExpireCheck() async {
     //获取设备二维码
-    getDeviceInfo();
+    await getDeviceInfo();
     BaseResponse? baseResponse = await ApiService.appAuthExpireCheck(qrCodeUrl);
     if (baseResponse?.code == 0) {
       Get.offAndToNamed(Routes.login);
     } else {
+      Get.offAndToNamed(Routes.login);
       Fluttertoast.showToast(
         msg: baseResponse?.msg ?? "没有权限或发生错误",
         toastLength: Toast.LENGTH_SHORT,
