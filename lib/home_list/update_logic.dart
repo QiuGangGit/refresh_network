@@ -1,12 +1,18 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:install_plugin/install_plugin.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:refresh_network/request/api_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../request/base_response.dart';
+import '../serivice/api_service.dart';
+import 'bean/UpdateBean.dart';
 
 mixin UpdateLogic on GetxController {
   @override
@@ -15,21 +21,17 @@ mixin UpdateLogic on GetxController {
   }
 
   Future<void> checkForUpdates() async {
-    // 模拟接口返回的数据
-    final updateInfo = {
-      "latestVersion": "1.0.0",
-      "isForceUpdate": true,
-      "updateUrl": "https://example.com/app.apk",
-      "updateMessage": "New version available! Fixes and improvements."
-    };
 
-    final currentVersion = "1.0.0"; // 当前版本号
-    if (_shouldUpdate(currentVersion, updateInfo["latestVersion"].toString())) {
+    String currentVersion = await getAppVersion(); // 当前版本号
+    AppUpdateBean? appUpdateBean =
+    await ApiService.appVersionCheck(currentVersion);
+
+    if (_shouldUpdate(currentVersion, appUpdateBean?.appversion??currentVersion)) {
       _showUpdateDialog(
         Get.context!,
-        updateInfo["isForceUpdate"] as bool,
-        updateInfo["updateMessage"] as String,
-        updateInfo["updateUrl"] as String,
+        appUpdateBean?.isForceUpdate??false,
+        appUpdateBean?.appContent??"",
+        ApiConfig.baseUrl+appUpdateBean!.appDownloadUrl??"",
       );
     }
   }
@@ -46,7 +48,7 @@ mixin UpdateLogic on GetxController {
       barrierDismissible: !isForceUpdate, // 如果是强制更新，禁止点击外部关闭
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Update Available"),
+          title: const Text("有更新可用"),
           content: Text(message),
           actions: [
             if (!isForceUpdate)
@@ -54,13 +56,13 @@ mixin UpdateLogic on GetxController {
                 onPressed: () {
                   Navigator.of(context).pop(); // 非强制更新时允许关闭弹窗
                 },
-                child: const Text("Cancel"),
+                child: const Text("取消"),
               ),
             TextButton(
               onPressed: () {
                 startUpdate(updateUrl); // 跳转到更新链接
               },
-              child: const Text("Update"),
+              child: const Text("更新"),
             ),
           ],
         );
@@ -105,29 +107,30 @@ mixin UpdateLogic on GetxController {
           .catchError((e) => print("Install failed: $e"));
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Update Page")),
-      body: Center(
-        child: downloadProgress > 0 && downloadProgress < 1
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                      "Downloading... ${(downloadProgress * 100).toStringAsFixed(1)}%"),
-                  SizedBox(height: 20),
-                  LinearProgressIndicator(value: downloadProgress),
-                ],
-              )
-            : ElevatedButton(
-                onPressed: () {
-                  startUpdate("https://example.com/app.apk"); // 替换为实际 APK 链接
-                },
-                child: Text("Start Update"),
-              ),
-      ),
-    );
+  Future<String> getAppVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    return packageInfo.version;  // 获取当前应用的版本
+  }
+  void sendOnline() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? qrCodeUrl = prefs.getString('qrCodeUrl') ?? "";
+    BaseResponse? baseResponse =
+    await ApiService.appHotelDeviceOnline(qrCodeUrl, "1");
+    if (baseResponse?.code == 0) {
+      print("------------设备上线了");
+    } else {
+      print("------------${baseResponse?.msg}");
+    }
+  }
+  void sendOffline() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? qrCodeUrl = prefs.getString('qrCodeUrl') ?? "";
+    BaseResponse? baseResponse =
+    await ApiService.appHotelDeviceOnline(qrCodeUrl, "0");
+    if (baseResponse?.code == 0) {
+      print("------------设备离线了");
+    } else {
+      print("------------${baseResponse?.msg}");
+    }
   }
 }

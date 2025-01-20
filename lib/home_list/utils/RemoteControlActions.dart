@@ -10,6 +10,7 @@ class RemoteControlActions {
     LogicalKeySet(LogicalKeyboardKey.arrowRight): MoveRightIntent(),
     LogicalKeySet(LogicalKeyboardKey.enter): ConfirmIntent(),
     LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
+    LogicalKeySet(LogicalKeyboardKey.home): HomeIntent(), // 添加 Home 键监听
   };
 
   // 定义 actions
@@ -55,3 +56,5 @@ class OpenRightDrawerIntent extends Intent {}
 class ConfirmIntent extends Intent {}
 
 class BackIntent extends Intent {}
+
+class HomeIntent extends Intent {}

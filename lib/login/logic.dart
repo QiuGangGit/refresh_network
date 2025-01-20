@@ -14,8 +14,7 @@ class LoginLogic extends GetxController {
   String qrCodeUrl = ""; // 二维码的链接
   Timer? loginCheckTimer; // 定时器
   bool isLoggedIn = false; // 登录状态
-  late AndroidDeviceInfo androidInfo;
-  final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
+
 
   @override
   void onInit() {
@@ -24,8 +23,9 @@ class LoginLogic extends GetxController {
   }
 
   getNetWork() async {
-    //获取设备二维码
-    getDeviceInfo();
+    final prefs = await SharedPreferences.getInstance();
+    qrCodeUrl = prefs.getString('qrCodeUrl') ?? 'default_value';
+    await ApiService.appInit();
     List<AppInitBean>? listInit = await ApiService.appInit();
     saveAppInitBeans(listInit);
   }
@@ -54,24 +54,7 @@ class LoginLogic extends GetxController {
     super.onClose();
   }
 
-  // 模拟生成二维码链接
-  Future<void> getDeviceInfo() async {
-    try {
-      // 获取设备信息
-      if (Platform.isAndroid) {
-        androidInfo = await _deviceInfoPlugin.androidInfo;
-        qrCodeUrl = androidInfo.id +
-            androidInfo.brand +
-            androidInfo.hardware +
-            androidInfo.fingerprint;
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('qrCodeUrl', qrCodeUrl); // 存储字符串
-        update();
-      }
-    } catch (e) {
-      print('Error getting device info: $e');
-    }
-  }
+
 
   // 开始轮询登录状态
   void startLoginStatusCheck() {

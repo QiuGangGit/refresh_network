@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:refresh_network/home_list/view.dart';
 import 'package:refresh_network/login/view.dart';
 import 'package:refresh_network/route.dart';
 import 'package:refresh_network/serivice/api_service.dart';
+import 'package:refresh_network/splash_page/splash_page.dart';
+
+import 'home_list/app_lifecycle_logic.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +30,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ApiService.init();
+    Get.put(AppLifecycleController()); // 在整个应用中保持生命周期的监听
     return ScreenUtilInit(
         designSize: const Size(375, 667),
         minTextAdapt: true, // 是否根据系统的“字体大小”辅助选项来缩放字体
@@ -35,7 +40,7 @@ class MyApp extends StatelessWidget {
             title: 'My App',
             getPages: Routes.pages,
             initialRoute: Routes.login,
-            home: LoginPage(),
+            home: SplashPage(),
           );
         });
   }

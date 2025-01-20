@@ -13,6 +13,12 @@ class BaseResponse<T> {
     msg = json['msg'];
     data = json['data'] != null ? fromJsonT(json['data']) : null;
   }
+  factory BaseResponse.fromJsons(Map<String, dynamic> json) {
+    return BaseResponse(
+      code: json['code'],
+      msg: json['msg'],
+    );
+  }
 
   Map<String, dynamic> toJson(Map<String, dynamic> Function(T? data) toJsonT) {
     final map = <String, dynamic>{};

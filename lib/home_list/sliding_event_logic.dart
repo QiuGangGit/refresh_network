@@ -76,7 +76,16 @@ mixin SlidingEventLogic on GetxController {
       BackIntent: CallbackAction<BackIntent>(
         onInvoke: (intent) {
           print("----22222------");
+          logic.sendOffline();
           Navigator.pop(context); // 关闭弹窗
+          return null;
+        },
+      ),
+      HomeIntent: CallbackAction<HomeIntent>( // Home 键触发的事件
+        onInvoke: (intent) {
+          print("Home button pressed");
+          logic.sendOffline(); // 发送离线请求
+          Get.back();
           return null;
         },
       ),

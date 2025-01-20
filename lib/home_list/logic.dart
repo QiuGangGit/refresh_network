@@ -35,7 +35,7 @@ class LiveStreamController extends GetxController
     getDeviceInfo(); //TODO 设备和网络放到一个logic
     checkForUpdates();
     getChannelData(); //获取频道数据
-
+    sendOnline();//设备上线
     _listenToNetworkChanges(); // 网络监听断网重连
   }
 
