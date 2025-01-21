@@ -24,7 +24,7 @@ mixin UpdateLogic on GetxController {
 
   Future<void> checkForUpdates() async {
 
-    
+
     String currentVersion = await getAppVersion(); // 当前版本号
     AppUpdateBean? appUpdateBean =
         await ApiService.appVersionCheck(currentVersion);
