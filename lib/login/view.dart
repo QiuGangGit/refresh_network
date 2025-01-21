@@ -23,13 +23,13 @@ class LoginPage extends StatelessWidget {
                   controller.qrCodeUrl.isEmpty || controller.qrCodeUrl.startsWith("Error")
                       ? Text(controller.qrCodeUrl) // 显示错误信息
                       : QrImageView(
-                    data: controller.qrCodeUrl,
+                    data: controller.miniProgramUrl,
                     version: QrVersions.auto,
                     size: 200.0,
                   ),
                   SizedBox(height: 20),
                   Text(
-                    "Use your phone to scan the QR code to log in.",
+                    "使用微信扫描二维码登录",
                     textAlign: TextAlign.center,
                   ),
                 ],

@@ -13,4 +13,5 @@ class APIS{
   static const appHotelDeviceOnline ="/api/app/AppHotelDeviceOnline";
   ///6设备更新
   static const appVersionCheck ="/api/app/AppVersionCheck";
+
 }
