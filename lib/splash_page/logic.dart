@@ -24,23 +24,9 @@ class SplashLogic extends GetxController {
     await getDeviceInfo();
     BaseResponse? baseResponse = await ApiService.appAuthExpireCheck(qrCodeUrl);
     if (baseResponse?.code == 0) {
-      Get.offAndToNamed(Routes.login);
+      Get.offAndToNamed(Routes.home);
     } else {
       Get.offAndToNamed(Routes.login);
-      Fluttertoast.showToast(
-        msg: baseResponse?.msg ?? "没有权限或发生错误",
-        toastLength: Toast.LENGTH_SHORT,
-        // 可以是 SHORT 或 LONG
-        gravity: ToastGravity.BOTTOM,
-        // 位置，可以是 TOP, BOTTOM 或 CENTER
-        timeInSecForIosWeb: 1,
-        // 对于 iOS 或 Web 应用，Toast 持续时间（秒）
-        backgroundColor: Colors.black,
-        // 背景色
-        textColor: Colors.white,
-        // 文本颜色
-        fontSize: 16.0, // 字体大小
-      );
     }
   }
 
@@ -56,6 +42,7 @@ class SplashLogic extends GetxController {
             androidInfo.fingerprint;
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('qrCodeUrl', qrCodeUrl); // 存储字符串
+        await prefs.setString('brand', androidInfo.brand); // 存储字符串
         update();
       }
     } catch (e) {
