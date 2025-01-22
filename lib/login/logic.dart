@@ -12,7 +12,6 @@ class LoginLogic extends GetxController {
   String qrCodeUrl = "";
   String miniProgramUrl = ""; //二维码链接
   Timer? loginCheckTimer; // 定时器
-  bool isLoggedIn = false; // 登录状态
   Timer? _timer; // 定时器
 
   @override
@@ -35,9 +34,9 @@ class LoginLogic extends GetxController {
 
     ///生成二维码链接
     String currentVersion = await getAppVersion(); // 当前版本号
-
+   // 构造普通链接
     miniProgramUrl =
-        "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${ticket}&deviceId=$qrCodeUrl&deviceVersion=$currentVersion&deviceModel=$brand";
+        'https://api-dev.nanyangcloud.com?deviceId=$qrCodeUrl&deviceVersion=$currentVersion&deviceModel=$brand';
     await ApiService.appInit();
     List<AppInitBean>? listInit = await ApiService.appInit();
     saveAppInitBeans(listInit);
