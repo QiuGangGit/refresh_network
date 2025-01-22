@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:refresh_network/request/api_config.dart';
 import 'package:refresh_network/serivice/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../home_list/bean/AppInitBean.dart';
@@ -36,7 +37,7 @@ class LoginLogic extends GetxController {
     String currentVersion = await getAppVersion(); // 当前版本号
    // 构造普通链接
     miniProgramUrl =
-        'https://api-dev.nanyangcloud.com?deviceId=$qrCodeUrl&deviceVersion=$currentVersion&deviceModel=$brand';
+        '${ApiConfig.baseUrl}?deviceId=$qrCodeUrl&deviceVersion=$currentVersion&deviceModel=$brand';
     await ApiService.appInit();
     List<AppInitBean>? listInit = await ApiService.appInit();
     saveAppInitBeans(listInit);
