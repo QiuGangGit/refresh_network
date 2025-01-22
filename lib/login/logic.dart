@@ -26,13 +26,6 @@ class LoginLogic extends GetxController {
     String qrCodeUrl = prefs.getString('qrCodeUrl') ?? 'default_value';
     String brand = prefs.getString('brand') ?? 'default_value';
 
-    ///获取小程序token
-    String? accessToken = await ApiService.getAccessToken();
-
-    ///获取小程序ticket
-    String? ticket =
-        await ApiService.generateQRCode(qrCodeUrl, accessToken ?? "");
-
     ///生成二维码链接
     String currentVersion = await getAppVersion(); // 当前版本号
    // 构造普通链接
