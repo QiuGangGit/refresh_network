@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../bean/category_with_channels.dart';
 import '../bean/channel_with_selection.dart';
 import '../logic.dart';
-import '../utils/DataUtils.dart';
 
 class ChannelListDialog extends StatelessWidget {
   const ChannelListDialog({super.key});
@@ -76,13 +75,13 @@ class ChannelListDialog extends StatelessWidget {
                 children: [
                   Container(
                     margin: EdgeInsets.only(left: 50.w),
-                    child: Text("version:1.0.0",
+                    child: Text("version:${Get.find<LiveStreamController>().getAppVersion()}",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 9,
+                          fontSize: 9.sp,
                         )),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Container(
                     margin: EdgeInsets.only(right: 80.w),
                     child: Row(

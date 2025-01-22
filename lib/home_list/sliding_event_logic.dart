@@ -5,6 +5,7 @@ import 'package:refresh_network/home_list/utils/DataUtils.dart';
 import 'package:refresh_network/home_list/utils/RemoteControlActions.dart';
 import 'package:refresh_network/home_list/widget/channel_list_widget.dart';
 import 'package:refresh_network/home_list/widget/decoder_options_widget.dart';
+import 'package:refresh_network/home_list/widget/device_info_widget.dart';
 
 import 'bean/channel_with_selection.dart';
 import 'logic.dart';
@@ -189,9 +190,8 @@ mixin SlidingEventLogic on GetxController {
       MoveUpIntent: CallbackAction<MoveUpIntent>(
         onInvoke: (intent) {
           if (isCategoryFocused) {
-            logic.settingIndex == 1
-                ? logic.settingIndex = 0
-                : logic.settingIndex = 1;
+            // 向上切换
+            logic.settingIndex = (logic.settingIndex - 1 + 3) % 3; // 2 -> 1 -> 0 -> 2
             logic.update();
           } else {
             // 更新 currentSourceIndex 或 decodeIndex，保证循环切换
@@ -217,9 +217,7 @@ mixin SlidingEventLogic on GetxController {
       MoveDownIntent: CallbackAction<MoveDownIntent>(
         onInvoke: (intent) {
           if (isCategoryFocused) {
-            logic.settingIndex == 1
-                ? logic.settingIndex = 0
-                : logic.settingIndex = 1;
+            logic.settingIndex = (logic.settingIndex + 1) % 3; // 循环切换 0 -> 1 -> 2 -> 0
             logic.update();
           } else {
             // 更新 currentSourceIndex 或 decodeIndex，确保下标加1并且循环
@@ -263,6 +261,15 @@ mixin SlidingEventLogic on GetxController {
                 logic.categoryIndex,
                 logic.channelIndex)); //准备数据播放
             Navigator.pop(context); // 退出弹窗
+          }
+          if(logic.settingIndex==2&&isCategoryFocused){
+            showDialog(
+              context: context,
+              barrierColor: Colors.transparent,
+              builder: (BuildContext context) {
+                return const DeviceInfoDialog();
+              },
+            );
           }
           return null;
         },
