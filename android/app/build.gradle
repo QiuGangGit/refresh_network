@@ -47,16 +47,34 @@ android {
         applicationId "com.example.refresh_network"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
-
+    signingConfigs {
+        release {
+            keyAlias 'release_key'
+            keyPassword '123456'
+            storeFile file('./release_key.jks') // 相对路径
+            storePassword '123456'
+        }
+    }
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
+            // 禁用代码调试
+            minifyEnabled false
+            shrinkResources false
+            // 使用默认的 Proguard 配置
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            // 禁用代码压缩和资源移除，便于调试
+            minifyEnabled false
+            shrinkResources false
             signingConfig signingConfigs.debug
         }
     }
