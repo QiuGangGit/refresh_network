@@ -75,10 +75,10 @@ class ChannelListDialog extends StatelessWidget {
                 children: [
                   Container(
                     margin: EdgeInsets.only(left: 50.w),
-                    child: Text("version:${Get.find<LiveStreamController>().getAppVersion()}",
+                    child: Text("version:${Get.find<LiveStreamController>().appVersion}",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 9.sp,
+                          fontSize: 6.sp,
                         )),
                   ),
                   const Spacer(),
@@ -144,7 +144,7 @@ class ChannelListDialog extends StatelessWidget {
           title,
           style: TextStyle(
             color: isSelect ? const Color(0xFFE65100) : Colors.white,
-            fontSize: 9.sp,
+            fontSize: 7.sp,
           ),
         ),
       ),
@@ -181,7 +181,7 @@ class ChannelListDialog extends StatelessWidget {
                       channels[index].channelName ?? "",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 9.sp,
+                        fontSize: 7.sp,
                       ),
                     ),
                   ),

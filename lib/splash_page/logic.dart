@@ -24,9 +24,9 @@ class SplashLogic extends GetxController {
     await getDeviceInfo();
     BaseResponse? baseResponse = await ApiService.appAuthExpireCheck(qrCodeUrl);
     if (baseResponse?.code == 0) {
-      Get.offAndToNamed(Routes.home);
+      Get.toNamed(Routes.home);
     } else {
-      Get.offAndToNamed(Routes.login);
+      Get.toNamed(Routes.login);
     }
   }
 
@@ -36,14 +36,10 @@ class SplashLogic extends GetxController {
       // 获取设备信息
       if (Platform.isAndroid) {
         androidInfo = await _deviceInfoPlugin.androidInfo;
-        qrCodeUrl = androidInfo.id +
-            androidInfo.brand +
-            androidInfo.hardware +
-            androidInfo.fingerprint;
+        qrCodeUrl = androidInfo.device;
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('qrCodeUrl', qrCodeUrl); // 存储字符串
         await prefs.setString('brand', androidInfo.brand); // 存储字符串
-        update();
       }
     } catch (e) {
       print('Error getting device info: $e');

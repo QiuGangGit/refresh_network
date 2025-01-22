@@ -65,14 +65,16 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             // 禁用代码调试
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
+            multiDexEnabled true
             // 使用默认的 Proguard 配置
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
         debug {
             // 禁用代码压缩和资源移除，便于调试
+            multiDexEnabled true
             minifyEnabled false
             shrinkResources false
             signingConfig signingConfigs.debug

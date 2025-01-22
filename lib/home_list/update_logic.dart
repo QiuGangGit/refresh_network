@@ -17,14 +17,13 @@ import 'bean/UpdateBean.dart';
 import 'logic.dart';
 
 mixin UpdateLogic on GetxController {
+  String appVersion="";
   @override
   void onInit() {
     super.onInit();
   }
 
   Future<void> checkForUpdates() async {
-
-
     String currentVersion = await getAppVersion(); // 当前版本号
     AppUpdateBean? appUpdateBean =
         await ApiService.appVersionCheck(currentVersion);
@@ -41,8 +40,18 @@ mixin UpdateLogic on GetxController {
   }
 
   bool _shouldUpdate(String currentVersion, String latestVersion) {
-    // 简单版本号比较，更多逻辑可以自行扩展
-    return currentVersion != latestVersion;
+    List<int> remoteParts = latestVersion.split('.').take(3).map(int.parse).toList();
+    List<int> currentParts = currentVersion.split('.').take(3).map(int.parse).toList();
+
+    // 转换为整数进行比较
+    int remoteValue = int.parse(remoteParts.join());
+    int currentValue = int.parse(currentParts.join());
+
+    print('Remote Value: $remoteValue');
+    print('Current Value: $currentValue');
+
+    // 返回比较结果
+    return remoteValue > currentValue;
   }
 
   void _showUpdateDialog(BuildContext context, bool isForceUpdate,
@@ -135,6 +144,8 @@ mixin UpdateLogic on GetxController {
 
   Future<String> getAppVersion() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    appVersion=packageInfo.version;
+    update();
     return packageInfo.version; // 获取当前应用的版本
   }
 
@@ -160,30 +171,5 @@ mixin UpdateLogic on GetxController {
     } else {
       print("------------${baseResponse?.msg}");
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Update Page")),
-      body: Center(
-        child: downloadProgress > 0 && downloadProgress < 1
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                      "Downloading... ${(downloadProgress * 100).toStringAsFixed(1)}%"),
-                  SizedBox(height: 20),
-                  LinearProgressIndicator(value: downloadProgress),
-                ],
-              )
-            : ElevatedButton(
-                onPressed: () {
-                  startUpdate("https://example.com/app.apk"); // 替换为实际 APK 链接
-                },
-                child: Text("Start Update"),
-              ),
-      ),
-    );
   }
 }

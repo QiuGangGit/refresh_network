@@ -19,10 +19,12 @@ class DecoderOptionsDialog extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: IgnorePointer(
-            ignoring: true,
-            child: Container(color: Colors.transparent),
-          ),
+          child: GestureDetector(
+              onTap: (){
+                Get.find<LiveStreamController>().restorePreviousSelection();
+                Get.back();
+              },
+              child: Container(color: Colors.transparent)),
         ),
         Positioned(
           right: 0,
@@ -101,7 +103,7 @@ class DecoderOptionsDialog extends StatelessWidget {
                             : currentChannels[index],
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 9.sp,
+                          fontSize: 6.sp,
                         ),
                       ),
                     ),
@@ -131,7 +133,7 @@ class DecoderOptionsDialog extends StatelessWidget {
                   child: Text("设置",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 9.sp,
+                        fontSize: 6.sp,
                       )),
                 ),
               ),
@@ -166,10 +168,10 @@ class DecoderOptionsDialog extends StatelessWidget {
                 child: Text(
                   "系统信息",
                   style: TextStyle(
-                      fontSize: 9.sp,
-                      color: Colors.white,
+                      fontSize: 6.sp,
+                      color: logic.settingIndex==2?Colors.deepOrange:Colors.white,
                       decoration: TextDecoration.underline,
-                      decorationColor: Colors.white,
+                      decorationColor: logic.settingIndex==2?Colors.deepOrange:Colors.white,
                       decorationThickness: 1.0),
                 ),
               ),
@@ -196,8 +198,8 @@ class DecoderOptionsDialog extends StatelessWidget {
         color: logic.settingIndex == index
             ? const Color(0xFFE65100)
             : Colors.transparent,
-        height: 30.w,
-        padding: EdgeInsets.only(right: 16.w),
+        height: 20.w,
+        padding: EdgeInsets.only(right: 8.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -206,28 +208,29 @@ class DecoderOptionsDialog extends StatelessWidget {
               title,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 9.sp,
-              ),
-            ),
-            Text(
-              index == 0 ? "源1" : "硬解码",
-              style: TextStyle(
-                color: Colors.white,
                 fontSize: 6.sp,
               ),
             ),
+            // Text(
+            //   index == 0 ? "源1" : "硬解码",
+            //   style: TextStyle(
+            //     color: Colors.white,
+            //     fontSize: 6.sp,
+            //   ),
+            // ),
           ],
         ),
       ),
     );
   }
 
-  void showDeviceInfo(BuildContext context) {
+  void showDeviceInfo(BuildContext context) async{
+
     showDialog(
       context: context,
       barrierColor: Colors.transparent,
       builder: (BuildContext context) {
-        return const DeviceInfoDialog();
+        return  DeviceInfoDialog();
       },
     );
   }

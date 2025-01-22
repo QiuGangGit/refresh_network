@@ -2,7 +2,7 @@
 <!-- Modify this file to customize your launch splash screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 背景颜色 -->
-    <item android:drawable="@android:color/my_custom_color"/>
+    <item android:drawable="@color/my_custom_color"/>
 
     <!-- 中间图标 -->
 <!--    <item>-->

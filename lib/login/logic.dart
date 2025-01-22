@@ -13,8 +13,6 @@ class LoginLogic extends GetxController {
   String qrCodeUrl = "";
   String miniProgramUrl = ""; //二维码链接
   Timer? loginCheckTimer; // 定时器
-  Timer? _timer; // 定时器
-
   @override
   void onInit() {
     super.onInit();
@@ -23,28 +21,22 @@ class LoginLogic extends GetxController {
 
   getNetWork() async {
     final prefs = await SharedPreferences.getInstance();
-    String qrCodeUrl = prefs.getString('qrCodeUrl') ?? 'default_value';
+    qrCodeUrl = prefs.getString('qrCodeUrl') ?? 'default_value';
     String brand = prefs.getString('brand') ?? 'default_value';
-
     ///生成二维码链接
     String currentVersion = await getAppVersion(); // 当前版本号
    // 构造普通链接
     miniProgramUrl =
-        '${ApiConfig.baseUrl}?deviceId=$qrCodeUrl&deviceVersion=$currentVersion&deviceModel=$brand';
+        '${ApiConfig.baseUrl}/?deviceId=$qrCodeUrl&deviceVersion=$currentVersion&deviceModel=$brand';
+    print("---------$miniProgramUrl");
+    update();
     await ApiService.appInit();
     List<AppInitBean>? listInit = await ApiService.appInit();
     saveAppInitBeans(listInit);
-
     ///我需要轮训鉴权接口然后
     /// 开始定时轮询
     startLoginStatusCheck();
-  }
-  @override
-  void dispose() {
-    if (_timer != null) {
-      _timer!.cancel(); // 取消定时器，停止轮询
-    }
-    super.dispose();
+
   }
 
   ///存储初始化数据
@@ -65,18 +57,19 @@ class LoginLogic extends GetxController {
   }
 
   @override
-  void onClose() {
+  void onDispose() {
+    // 释放定时器
     loginCheckTimer?.cancel();
+    loginCheckTimer = null;
+    print("定时器已取消");
     super.onClose();
   }
-
   void startLoginStatusCheck() {
     // 启动定时器，每 2 秒检查一次登录状态
     loginCheckTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       try {
         // 调用鉴权接口
         BaseResponse? baseResponse = await ApiService.appAuthExpireCheck(qrCodeUrl);
-
         // 判断鉴权是否成功
         if (baseResponse?.code == 0) {
           // 鉴权成功，跳转到首页并停止定时器
@@ -96,6 +89,7 @@ class LoginLogic extends GetxController {
         // 处理异常后的逻辑，比如显示错误提示
         Get.snackbar('错误', '网络请求失败，请检查网络连接');
         // 重新启动定时器，以便继续尝试请求
+        loginCheckTimer?.cancel();
         startLoginStatusCheck(); // 重新启动定时器
       }
     });

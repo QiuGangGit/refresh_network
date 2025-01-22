@@ -12,6 +12,7 @@ class DeviceInfoDialog extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
     return GetBuilder<LiveStreamController>(
       builder: (logic) {
+
         return Stack(
           children: [
             Positioned(
@@ -49,40 +50,40 @@ class DeviceInfoDialog extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "系统版本:${logic.androidInfo.version}",
+                          "系统版本:${logic.appVersion}",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 6.sp,
                           ),
                         ),
-                        Text(
-                          "软件版本:${1}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 6.sp,
-                          ),
-                        ),
-                        Text(
-                          "插件版本:${1}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 6.sp,
-                          ),
-                        ),
-                        Text(
-                          "无线MAC:${1}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 6.sp,
-                          ),
-                        ),
-                        Text(
-                          "有线MAC:${1}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 6.sp,
-                          ),
-                        )
+                        // Text(
+                        //   "软件版本:${1}",
+                        //   style: TextStyle(
+                        //     color: Colors.white,
+                        //     fontSize: 6.sp,
+                        //   ),
+                        // ),
+                        // Text(
+                        //   "插件版本:${1}",
+                        //   style: TextStyle(
+                        //     color: Colors.white,
+                        //     fontSize: 6.sp,
+                        //   ),
+                        // ),
+                        // Text(
+                        //   "无线MAC:${1}",
+                        //   style: TextStyle(
+                        //     color: Colors.white,
+                        //     fontSize: 6.sp,
+                        //   ),
+                        // ),
+                        // Text(
+                        //   "有线MAC:${1}",
+                        //   style: TextStyle(
+                        //     color: Colors.white,
+                        //     fontSize: 6.sp,
+                        //   ),
+                        // )
                       ],
                     ),
                   ),

@@ -46,7 +46,7 @@ class ApiService extends GetxService {
     dynamic value = await requestClient
         .post(APIS.appAuthExpireCheck, data: {"deviceId": deviceId});
     final response = BaseResponse.fromJsons(value);
-    return response.data;
+    return response;
   }
 
   ///设备在线和离线

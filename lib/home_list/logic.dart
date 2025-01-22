@@ -31,6 +31,7 @@ class LiveStreamController extends GetxController
   @override
   Future<void> onInit() async {
     super.onInit();
+    getAppVersion();
     initializePlayer();
     getDeviceInfo(); //TODO 设备和网络放到一个logic
     checkForUpdates();
