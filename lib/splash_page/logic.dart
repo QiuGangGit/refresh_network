@@ -26,6 +26,10 @@ class SplashLogic extends GetxController {
     if (baseResponse?.code == 0) {
       Get.toNamed(Routes.home);
     } else {
+      if(baseResponse?.msg=="设备授权已到期"){
+        Fluttertoast.showToast( msg: baseResponse?.msg??'', toastLength: Toast.LENGTH_LONG,);
+        return;
+      }
       Get.toNamed(Routes.login);
     }
   }

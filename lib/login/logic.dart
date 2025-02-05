@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:refresh_network/request/api_config.dart';
@@ -76,6 +77,9 @@ class LoginLogic extends GetxController {
           Get.offAndToNamed(Routes.home);
           loginCheckTimer?.cancel(); // 停止定时器
         } else {
+          if(baseResponse?.msg=="设备授权已到期"){
+            Fluttertoast.showToast( msg: baseResponse?.msg??'', toastLength: Toast.LENGTH_LONG,);
+          }
           // 鉴权失败，重新开始 2 秒的鉴权检查
           print('鉴权失败，重新开始检查...');
           // 取消当前定时器，避免重复执行
