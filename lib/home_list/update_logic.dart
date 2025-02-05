@@ -28,13 +28,13 @@ mixin UpdateLogic on GetxController {
     AppUpdateBean? appUpdateBean =
         await ApiService.appVersionCheck(currentVersion);
 
-    if (_shouldUpdate(
-        currentVersion, appUpdateBean?.appversion ?? currentVersion)) {
+    if (appUpdateBean!=null&&_shouldUpdate(
+        currentVersion, appUpdateBean.appversion ?? currentVersion)) {
       _showUpdateDialog(
         Get.context!,
-        appUpdateBean?.isForceUpdate ?? false,
-        appUpdateBean?.appContent ?? "",
-        appUpdateBean!.appDownloadUrl ?? "",
+        appUpdateBean.isForceUpdate ?? false,
+        appUpdateBean.appContent ?? "",
+        appUpdateBean.appDownloadUrl ?? "",
       );
     }
   }
