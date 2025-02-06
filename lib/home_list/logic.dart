@@ -143,11 +143,15 @@ class LiveStreamController extends GetxController
 
   ///右侧频道部分 切换选台
   void clickRightChannel(int index) {
+    // 清空之前保存的状态
+    previousCategoryIndex = null;
+    previousChannelIndex = null;
     channelIndex = index; // 当前频道索引
     // 更新选中状态
     selectCategory(categoryWithChannels, categoryIndex);
     selectChannel(
         categoryWithChannels[categoryIndex].channels ?? [], channelIndex);
+
     setupPlayer(DataUtils.getCurrentStreamUrl(
         categoryWithChannels, categoryIndex, channelIndex)); //准备数据播放
     update();
