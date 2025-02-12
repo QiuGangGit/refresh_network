@@ -95,7 +95,7 @@ class LiveStreamController extends GetxController
       return;
     }
     // 保存之前的选中状态
-    if(savesaveCurrent){
+    if(savesaveCurrent&&previousCategoryIndex==null&&previousChannelIndex==null){
       previousCategoryIndex = categoryIndex;
       previousChannelIndex = categoryWithChannels[categoryIndex]
           .channels
