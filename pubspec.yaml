@@ -49,7 +49,7 @@ dependencies:
   qr_flutter: ^4.0.0
   shared_preferences: ^2.2.2
   package_info_plus: ^3.0.0
-  fluttertoast: ^8.0.9
+  fluttertoast: ^8.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
